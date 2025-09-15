@@ -33,7 +33,7 @@ collection.add(
 )
 
 first_query = collection.query(
-    query_texts=['james bond', '007', 'weapons', 'spy'],
+    query_texts=['james bond', '007', 'spy'],
     n_results=10,
     include=['documents']    
 )
