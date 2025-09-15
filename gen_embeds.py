@@ -6,7 +6,7 @@ import time
 start_time = time.time()
 
 description_list = []
-for i, movie in movie_file[:50].iterrows():
+for i, movie in movie_file[:100].iterrows():
     movieId = movie['movieId']
     tags = tags_file[tags_file['movieId'] == movieId]
     tag_text = ''.join(str(tags['tag'].tolist()))    
@@ -29,7 +29,7 @@ collection = client.create_collection('movies')
 collection.add(
     embeddings=embeddings.tolist(),
     documents=description_list,
-    ids=[str(movie['movieId']) for _, movie in movie_file[:50].iterrows()]
+    ids=[str(movie['movieId']) for _, movie in movie_file[:100].iterrows()]
 )
 
 first_query = collection.query(
