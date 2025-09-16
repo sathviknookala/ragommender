@@ -5,14 +5,14 @@ import chromadb
 import time
 start_time = time.time()
 
-description_list = []
-for i, movie in movie_file.iterrows():
+description_list = {}
+for _, movie in movie_file.iterrows():
     movieId = movie['movieId']
     tags = tags_file[tags_file['movieId'] == movieId]
     tag_text = ''.join(str(tags['tag'].tolist()))    
 
     description = f"movie: {movie['title']}. genre: {movie['genres']}. tags: {tag_text}"
-    description_list.append(description)
+    description_list[movie['title']] = description
 
 model = SentenceTransformer('all-MiniLM-L6-v2', device='cuda')
 print('Model loaded successfully')
