@@ -6,7 +6,7 @@ import time
 start_time = time.time()
 
 description_list = []
-for i, movie in movie_file[:100].iterrows():
+for i, movie in movie_file.iterrows():
     movieId = movie['movieId']
     tags = tags_file[tags_file['movieId'] == movieId]
     tag_text = ''.join(str(tags['tag'].tolist()))    
@@ -35,7 +35,7 @@ if collection.count() == 0:
     collection.add(
         embeddings=embeddings.tolist(),
         documents=description_list,
-        ids=[str(movie['movieId']) for _, movie in movie_file[:100].iterrows()]
+        ids=[str(movie['movieId']) for _, movie in movie_file.iterrows()]
     )
 else:
     print('Collection has data')
