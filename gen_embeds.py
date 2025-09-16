@@ -23,14 +23,22 @@ embeddings = model.encode(
     batch_size=384 
     )
 
-client = chromadb.Client()
-collection = client.create_collection('movies')
+client = chromadb.PersistentClient()
 
-collection.add(
-    embeddings=embeddings.tolist(),
-    documents=description_list,
-    ids=[str(movie['movieId']) for _, movie in movie_file[:100].iterrows()]
-)
+try:
+    collection = client.get_collection('movies')
+except:
+    collection = client.create_collection('movies')
+    print('Creating collection')
+
+if collection.count() == 0:
+    collection.add(
+        embeddings=embeddings.tolist(),
+        documents=description_list,
+        ids=[str(movie['movieId']) for _, movie in movie_file[:100].iterrows()]
+    )
+else:
+    print('Collection has data')
 
 first_query = collection.query(
     query_texts=['james bond', '007', 'spy'],
