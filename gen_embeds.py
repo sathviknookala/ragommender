@@ -42,7 +42,7 @@ else:
     print('Collection has data')
 
 first_query = collection.query(
-    query_texts=['james bond', '007', 'spy'],
+    query_texts=['james bond', '007', 'spy', 'action', 'guns'],
     n_results=10,
     include=['distances']    
 )
