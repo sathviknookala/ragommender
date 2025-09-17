@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
-import pandas as pd
 from get_user_profile import movie_file, tags_file, id_file
 import chromadb
+import sys
 import time
 start_time = time.time()
 
@@ -13,12 +13,13 @@ for _, movie in movie_file.iterrows():
 
     description = f"movie: {movie['title']}. genre: {movie['genres']}. tags: {tag_text}"
     description_list[movie['title']] = description
+descriptions_for_embedding = list(description_list.values())
 
 model = SentenceTransformer('all-MiniLM-L6-v2', device='cuda')
 print('Model loaded successfully')
 
 embeddings = model.encode(
-    description_list,
+    descriptions_for_embedding,    
     normalize_embeddings=True,
     batch_size=384 
     )
@@ -34,8 +35,8 @@ except:
 if collection.count() == 0:
     collection.add(
         embeddings=embeddings.tolist(),
-        documents=description_list,
-        ids=[str(movie['movieId']) for _, movie in movie_file.iterrows()]
+        documents=descriptions_for_embedding,
+        ids=list(description_list.keys())
     )
 else:
     print('Collection has data')
@@ -43,11 +44,10 @@ else:
 first_query = collection.query(
     query_texts=['james bond', '007', 'spy'],
     n_results=10,
-    include=['documents']    
+    include=['distances']    
 )
 
 for k, v in first_query.items():
     print(f"key: {k} | value: {v}")
-
 end_time = time.time()
 print(f"Time taken: {end_time-start_time}")
