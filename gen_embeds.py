@@ -31,7 +31,7 @@ try:
 except:
     collection = client.create_collection('movies')
     print('Creating collection')
-
+    
 if collection.count() == 0:
     collection.add(
         embeddings=embeddings.tolist(),
@@ -42,7 +42,7 @@ else:
     print('Collection has data')
 
 first_query = collection.query(
-    query_texts=['james bond', '007', 'spy', 'action', 'guns'],
+    query_texts=['james bond spy movie'],
     n_results=10,
     include=['distances']    
 )
