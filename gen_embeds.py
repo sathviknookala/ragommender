@@ -29,7 +29,18 @@ client = chromadb.PersistentClient()
 try:
     collection = client.get_collection('movies')
 except:
-    collection = client.create_collection('movies')
+    collection = client.create_collection(
+        name='movies',
+        embedding_function=SentenceTransformer('all-MiniLM-L6-v2', device='cuda'),
+        configuration={
+            'hnsw': {
+                'space': 'cosine',
+                'M': 16,
+                'ef_construction': 200,
+                'ef': 100,
+            }
+        }
+    )
     print('Creating collection')
     
 if collection.count() == 0:
