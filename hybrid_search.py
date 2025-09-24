@@ -8,6 +8,7 @@ class Retrieval:
         collection.query(
             query_vector=query_vector,
             n_results=k,
+	    include=['distances']
         )
 
     def bm25_rank(self, query_text, k):
