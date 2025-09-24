@@ -38,6 +38,7 @@ except:
                 'M': 16,
                 'ef_construction': 200,
                 'ef': 100,
+		'max_elements': 100000
             }
         }
     )
