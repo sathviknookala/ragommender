@@ -27,18 +27,16 @@ embeddings = model.encode(
 client = chromadb.PersistentClient()
 
 try:
-    collection = client.get_collection('movies')
+    collection = client.get_collection('movie_database')
 except:
     collection = client.create_collection(
-        name='movies',
-        embedding_function=SentenceTransformer('all-MiniLM-L6-v2', device='cuda'),
+        name='movie_database',
         configuration={
             'hnsw': {
                 'space': 'cosine',
-                'M': 16,
+                'max_neighbors': 16,
                 'ef_construction': 200,
-                'ef': 100,
-		'max_elements': 100000
+                'ef_search': 100,
             }
         }
     )
