@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from retrieval import hybrid_search
 from retrieval import get_similar 
 from retrieval import get_user_profile
+import time
 
 app = FastAPI()
 
