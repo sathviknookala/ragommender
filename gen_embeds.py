@@ -67,13 +67,6 @@ def create_collection(names_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
     return collection        
 
 collection = create_collection(movie_file, tags_file, 10000)
-first_query = collection.query(
-    query_texts=['james bond spy movie'],
-    n_results=5,
-    include=['distances']    
-)
 
-for k, v in first_query.items():
-    print(f"key: {k} | value: {v}")
 end_time = time.time()
 print(f"Time taken: {end_time-start_time}")
