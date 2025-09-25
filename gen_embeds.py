@@ -1,59 +1,75 @@
 from sentence_transformers import SentenceTransformer
 from get_user_profile import movie_file, tags_file, id_file
 import chromadb
-import sys
+import pandas as pd
 import time
+import math
 start_time = time.time()
 
-description_list = {}
-for _, movie in movie_file.iterrows():
-    movieId = movie['movieId']
-    tags = tags_file[tags_file['movieId'] == movieId]
-    tag_text = ''.join(str(tags['tag'].tolist()))    
+def create_collection(names_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
+    description_list = {}
+    for movie in names_df[:k].itertuples():
+        movieId = movie.movieId
+        tags = tags_df[tags_df['movieId'] == movieId]
+        tag_text = ''.join(str(tags['tag'].tolist()))    
 
-    description = f"movie: {movie['title']}. genre: {movie['genres']}. tags: {tag_text}"
-    description_list[movie['title']] = description
-descriptions_for_embedding = list(description_list.values())
+        description = f"movie: {movie.title}. genre: {movie.genres}. tags: {tag_text}"
+        description_list[movie.title] = description
+    descriptions_for_embedding = list(description_list.values())
 
-model = SentenceTransformer('all-MiniLM-L6-v2', device='cuda')
-print('Model loaded successfully')
+    model = SentenceTransformer('all-MiniLM-L6-v2', device='cuda')
+    print('Model loaded successfully')
 
-embeddings = model.encode(
-    descriptions_for_embedding,    
-    normalize_embeddings=True,
-    batch_size=384 
-    )
+    embeddings = model.encode(
+        descriptions_for_embedding,    
+        normalize_embeddings=True,
+        batch_size=384 
+        ).tolist()
 
-client = chromadb.PersistentClient()
+    client = chromadb.PersistentClient()
 
-try:
-    collection = client.get_collection('movie_database')
-except:
-    collection = client.create_collection(
-        name='movie_database',
-        configuration={
-            'hnsw': {
-                'space': 'cosine',
-                'max_neighbors': 16,
-                'ef_construction': 200,
-                'ef_search': 100,
+    try:
+        collection = client.get_collection('rag_db')
+    except:
+        collection = client.create_collection(
+            name='rag_db',
+            configuration={
+                'hnsw': {
+                    'space': 'cosine',
+                    'max_neighbors': 16,
+                    'ef_construction': 200,
+                    'ef_search': 100,
+                }
             }
-        }
-    )
-    print('Creating collection')
-    
-if collection.count() == 0:
-    collection.add(
-        embeddings=embeddings.tolist(),
-        documents=descriptions_for_embedding,
-        ids=list(description_list.keys())
-    )
-else:
-    print('Collection has data')
+        )
+        print('Creating collection')
 
+    def batches(collection, embeddings, documents, ids, batch_size=5400):
+        for index, i in enumerate(range(0, len(embeddings), batch_size), 1):
+            batch_end = min(len(embeddings), i+batch_size)
+
+            batch_embeddings = embeddings[i:batch_end]
+            batch_documents = documents[i:batch_end]
+            batch_ids = ids[i:batch_end]
+
+            collection.add(
+                embeddings=batch_embeddings,
+                documents=batch_documents,
+                ids=batch_ids
+            )
+            print(f"Added batch {index} of {math.ceil(len(embeddings)/batch_size)}")
+
+    if collection.count() == 0:
+        batches(collection, embeddings, descriptions_for_embedding, list(description_list.keys()))
+    else:
+        print('Collection has data')
+
+    return collection        
+
+collection = create_collection(movie_file, tags_file, 10000)
 first_query = collection.query(
     query_texts=['james bond spy movie'],
-    n_results=10,
+    n_results=5,
     include=['distances']    
 )
 
