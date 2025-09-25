@@ -17,7 +17,7 @@ def create_collection(names_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
         description_list[movie.title] = description
     descriptions_for_embedding = list(description_list.values())
 
-    model = SentenceTransformer('all-MiniLM-L6-v2', device='cuda')
+    model = SentenceTransformer('all-MiniLM-L6-v2',device='cuda')
     print('Model loaded successfully')
 
     embeddings = model.encode(
