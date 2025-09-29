@@ -29,5 +29,5 @@ if __name__ == "__main__":
 
     query = retrieval.knn_search(['horror movies'])
 
-    query2 = retrieval.knn_search(['comedies'])
+    query2 = retrieval.knn_search(['sad heartfelt rom coms'])
     print(query2)
