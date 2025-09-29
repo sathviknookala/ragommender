@@ -28,4 +28,6 @@ if __name__ == "__main__":
     retrieval = Retrieval(collection)
 
     query = retrieval.knn_search(['horror movies'])
-    print(query)
+
+    query2 = retrieval.knn_search(['comedies'])
+    print(query2)
