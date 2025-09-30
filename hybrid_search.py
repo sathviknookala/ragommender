@@ -27,7 +27,8 @@ if __name__ == "__main__":
     collection = client.get_collection('rag_db')
     retrieval = Retrieval(collection)
 
-    query = retrieval.knn_search(['horror movies'])
+    query = retrieval.knn_search(['horror movies'])['ids']
+    print(f"Horror movies: {query}") 
 
-    query2 = retrieval.knn_search(['sad heartfelt rom coms'])
-    print(query2)
+    query2 = retrieval.knn_search(['sad heartfelt rom coms'])['ids']
+    print(f"Sad heartfelt rom coms: {query2}") 
