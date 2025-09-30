@@ -6,6 +6,12 @@ import time
 import math
 start_time = time.time()
 
+bm25_engine = None
+def bm25_engine():
+    global bm25_engine
+    if bm25_engine is None:
+        movies_df = pd.read_csv('movie-info/movies.csv')
+
 def create_collection(names_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
     description_list = {}
     for movie in names_df[:k].itertuples():
