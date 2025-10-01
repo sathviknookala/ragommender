@@ -8,10 +8,14 @@ import time
 import torch
 import math
 start_time = time.time()
-nlp = spacy.load("en_core_web_sm")
 
+# cuda dependent 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(device)
+print(f"Device being used: {device}")
+spacy.require_gpu()
+nlp = spacy.load("en_core_web_sm")
+model = SentenceTransformer('all-MiniLM-L6-v2',device=device)
+print('Model loaded successfully')
 
 def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
     '''
@@ -36,9 +40,6 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         bm25_corpus.append(tokens) 
         movieIds.append(movie)
     descriptions_for_embedding = list(description_list.values())
-
-    model = SentenceTransformer('all-MiniLM-L6-v2',device=device)
-    print('Model loaded successfully')
 
     embeddings = model.encode(
         descriptions_for_embedding,    
@@ -86,7 +87,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
 
     return collection, bm25_corpus, movieIds        
 
-collection = create_collection('rag_db', movie_file, tags_file, 10000)
+collection, bm25_index, movieIds = create_collection('rag_db', movie_file, tags_file, 10000)
 
 end_time = time.time()
 print(f"Time taken: {end_time-start_time}")
