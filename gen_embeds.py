@@ -10,24 +10,17 @@ import math
 start_time = time.time()
 nlp = spacy.load("en_core_web_sm")
 
-print(torch.__version__)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(device)
 
-def create_corpus(movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
-    '''
-    Initializes bm25 indexing engine
-    ''' 
-    corpus = []
-    for movie in movie_df[:k].itertuples():
-        movieId = movie.movieId
-
-
 def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
     '''
-    Initializes chromadb collection for KNN search
+    Initializes chromadb collection and bm25 corpus for hybrid search
     '''
     description_list = {}
+    bm25_corpus = []
+    movieIds = []
+
     for movie in movie_df[:k].itertuples():
         movieId = movie.movieId
         tags = tags_df[tags_df['movieId'] == movieId]
@@ -35,9 +28,16 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
 
         description = f"movie: {movie.title}. genre: {movie.genres}. tags: {tag_text}"
         description_list[movie.title] = description
+
+        bm25_text = f"{movie.title} {movie.genres} {tag_text}"        
+
+        doc = nlp(bm25_text.lower())
+        tokens = [token.text for token in doc if token.is_alpha and not token.is_stop]
+        bm25_corpus.append(tokens) 
+        movieIds.append(movie)
     descriptions_for_embedding = list(description_list.values())
 
-    model = SentenceTransformer('all-MiniLM-L6-v2',device='cuda')
+    model = SentenceTransformer('all-MiniLM-L6-v2',device=device)
     print('Model loaded successfully')
 
     embeddings = model.encode(
@@ -48,19 +48,21 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
 
     client = chromadb.PersistentClient()
 
-
-    collection = client.create_collection(
-        name=collection_name,
-        configuration={
-            'hnsw': {
-                'space': 'cosine',
-                'max_neighbors': 16,
-                'ef_construction': 200,
-                'ef_search': 100,
-            } 
-        }
-    )
-    print('Creating collection')
+    try:
+        collection = client.create_collection(
+            name=collection_name,
+            configuration={
+                'hnsw': {
+                    'space': 'cosine',
+                    'max_neighbors': 16,
+                    'ef_construction': 200,
+                    'ef_search': 100,
+                } 
+            }
+        )
+        print('Creating collection')
+    except:
+        collection = client.get_collection('rag_db') 
 
     def batches(collection, embeddings, documents, ids, batch_size=5400):
         for index, i in enumerate(range(0, len(embeddings), batch_size), 1):
@@ -82,7 +84,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     else:
         print('Collection has data')
 
-    return collection        
+    return collection, bm25_corpus, movieIds        
 
 collection = create_collection('rag_db', movie_file, tags_file, 10000)
 
