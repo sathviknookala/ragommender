@@ -4,6 +4,7 @@ from get_user_profile import movie_file, tags_file, id_file
 import chromadb
 import pandas as pd
 import spacy
+import pickle
 import time
 import torch
 import math
@@ -39,12 +40,15 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         tokens = [token.text for token in doc if token.is_alpha and not token.is_stop]
         bm25_corpus.append(tokens) 
         movieIds.append(movie)
+    bm25_index = BM25Okapi(bm25_text)
     descriptions_for_embedding = list(description_list.values())
 
     embeddings = model.encode(
         descriptions_for_embedding,    
         normalize_embeddings=True,
-        batch_size=384 
+        batch_size=512,
+        show_progress_bar=True,
+        convert_to_tensor=True
         ).tolist()
 
     client = chromadb.PersistentClient()
@@ -85,9 +89,11 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     else:
         print('Collection has data')
 
-    return collection, bm25_corpus, movieIds        
+    return collection, bm25_index, movieIds        
 
 collection, bm25_index, movieIds = create_collection('rag_db', movie_file, tags_file, 10000)
+with open('bm25/bm25_data.pkl', 'wb') as f:
+    pickle.dump(bm25_index, f)
 
 end_time = time.time()
 print(f"Time taken: {end_time-start_time}")
