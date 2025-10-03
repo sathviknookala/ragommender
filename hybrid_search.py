@@ -1,10 +1,13 @@
 from sklearn.neighbors import KNeighborsClassifier
 from rank_bm25 import BM25Okapi
 import chromadb
+import pickle
 
 class Retrieval:
-    def __init__(self, collection):
+    def __init__(self, collection, bm25_filepath):
         self.collection = collection
+        with open(bm25_filepath, 'rb') as f:
+            self.bm25_index = pickle.load(f)
 
     def knn_search(self, query_vector, k=5):
         # chromadb implementation
@@ -25,10 +28,7 @@ class Retrieval:
 if __name__ == "__main__":
     client = chromadb.PersistentClient()
     collection = client.get_collection('rag_db')
-    retrieval = Retrieval(collection)
-
-    from gen_embeds import bm25_index
-    # first implementation
+    retrieval = Retrieval(collection, 'bm25bm25_data.pkl')
 
     query = retrieval.knn_search(['horror movies'])['ids']
     print(f"Horror movies: {query}") 
