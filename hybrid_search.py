@@ -27,6 +27,9 @@ if __name__ == "__main__":
     collection = client.get_collection('rag_db')
     retrieval = Retrieval(collection)
 
+    from gen_embeds import bm25_index
+    # first implementation
+
     query = retrieval.knn_search(['horror movies'])['ids']
     print(f"Horror movies: {query}") 
 
