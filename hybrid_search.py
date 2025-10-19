@@ -1,6 +1,8 @@
 from sklearn.neighbors import KNeighborsClassifier
 from rank_bm25 import BM25Okapi
 import chromadb
+import spacy
+import numpy as np
 import pickle
 
 class Retrieval:
@@ -17,9 +19,20 @@ class Retrieval:
             include=['distances']
         )
 
-    def bm25_rank(self, query_text, k):
+    def bm25_rank(self, query_text, k=5):
         # rank_bm25 implementation
-        pass
+        doc = self.nlp(query_text.lower())
+        query_tokens = [token.text for token in doc if token.is_alpha and not token.is_stop]
+
+        if not query_tokens:
+            return []
+        
+        scores = self.bm25_index.get_scores(query_tokens)
+        top_indices = np.argsort(scores)[-k:][::-1]
+
+        results = []
+        for idx in top_indices:
+            movie = self.movie_ids[idx]
 
     def hybrid_search(self, query_vector, query_text, k):
         # knn_search + bm25_rank hybrid retrieval logic
