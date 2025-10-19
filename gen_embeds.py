@@ -40,7 +40,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         tokens = [token.text for token in doc if token.is_alpha and not token.is_stop]
         bm25_corpus.append(tokens) 
         movieIds.append(movie)
-    bm25_index = BM25Okapi(bm25_text)
+    bm25_index = BM25Okapi(bm25_corpus)
     descriptions_for_embedding = list(description_list.values())
 
     embeddings = model.encode(

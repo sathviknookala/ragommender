@@ -9,7 +9,7 @@ class Retrieval:
     def __init__(self, collection, bm25_filepath):
         self.collection = collection
         with open(bm25_filepath, 'rb') as f:
-            self.bm25_index = pickle.load(f)
+            self.bm25_data = pickle.load(f)
 
     def knn_search(self, query_vector, k=5):
         # chromadb implementation
@@ -27,7 +27,7 @@ class Retrieval:
         if not query_tokens:
             return []
         
-        scores = self.bm25_index.get_scores(query_tokens)
+        scores = self.bm25_data.get_scores(query_tokens)
         top_indices = np.argsort(scores)[-k:][::-1]
 
         results = []
@@ -41,7 +41,7 @@ class Retrieval:
 if __name__ == "__main__":
     client = chromadb.PersistentClient()
     collection = client.get_collection('rag_db')
-    retrieval = Retrieval(collection, 'bm25bm25_data.pkl')
+    retrieval = Retrieval(collection, 'bm25/bm25_data.pkl')
 
     query = retrieval.knn_search(['horror movies'])['ids']
     print(f"Horror movies: {query}") 
