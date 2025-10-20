@@ -17,3 +17,5 @@ def similar(user_id: str):
 def recommend(user_id: str):
     return {'recommendations': [], 'cached': False}
 
+if __name__ == '__main__':
+    print(tags_file.loc[tags_file['movieId'] == 8859, 'tag'])

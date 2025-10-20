@@ -1,6 +1,6 @@
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
-from get_user_profile import movie_file, tags_file, id_file
+from get_user_profile import movie_file, tags_file
 import chromadb
 import pandas as pd
 import spacy
@@ -8,6 +8,7 @@ import pickle
 import time
 import torch
 import math
+import sys
 start_time = time.time()
 
 # cuda dependent 
@@ -23,28 +24,26 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     Initializes chromadb collection and bm25 corpus for hybrid search
     '''
     description_list = {}
-    bm25_corpus = []
-    movieIds = []
+    movieIds = {}
+    all_texts = []
 
+    tags_grouped = tags_df.groupby('movieId')['tag'].apply(list).to_dict()
     for movie in movie_df[:k].itertuples():
-        movieId = movie.movieId
-        tags = tags_df[tags_df['movieId'] == movieId]
-        tag_text = ''.join(str(tags['tag'].tolist()))    
+        tags = tags_grouped.get(movie.movieId, [])
+        clean_tags = [str(tag) for tag in tags if not pd.isna(tag) and tag!='']
+        text = f"{movie.title} {movie.genres} {' '.join(clean_tags)}"
 
-        description = f"movie: {movie.title}. genre: {movie.genres}. tags: {tag_text}"
-        description_list[movie.title] = description
+        all_texts.append(text)
+        description_list[str(movie.movieId)] = text
+        movieIds[movie.movieId] = movie.title
 
-        bm25_text = f"{movie.title} {movie.genres} {tag_text}"        
-
-        doc = nlp(bm25_text.lower())
-        tokens = [token.text for token in doc if token.is_alpha and not token.is_stop]
-        bm25_corpus.append(tokens) 
-        movieIds.append(movie)
-    bm25_index = BM25Okapi(bm25_corpus)
-    descriptions_for_embedding = list(description_list.values())
+    docs = list(nlp.pipe(all_texts, batch_size=1000))
+    tokens_list = [[token.text for token in doc if token.is_alpha and not token.is_stop]
+                   for doc in docs]         
+    bm25_index = BM25Okapi(tokens_list)
 
     embeddings = model.encode(
-        descriptions_for_embedding,    
+        all_texts,    
         normalize_embeddings=True,
         batch_size=512,
         show_progress_bar=True,
@@ -52,22 +51,23 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         ).tolist()
 
     client = chromadb.PersistentClient()
-
     try:
-        collection = client.create_collection(
-            name=collection_name,
-            configuration={
-                'hnsw': {
-                    'space': 'cosine',
-                    'max_neighbors': 16,
-                    'ef_construction': 200,
-                    'ef_search': 100,
-                } 
-            }
-        )
-        print('Creating collection')
+        client.delete_collection(name=collection_name)
     except:
-        collection = client.get_collection('rag_db') 
+        pass        
+
+    collection = client.create_collection(
+        name=collection_name,
+        configuration={
+            'hnsw': {
+                'space': 'cosine',
+                'max_neighbors': 16,
+                'ef_construction': 200,
+                'ef_search': 100,
+            } 
+        }
+    )
+    print('Creating collection')
 
     def batches(collection, embeddings, documents, ids, batch_size=5400):
         for index, i in enumerate(range(0, len(embeddings), batch_size), 1):
@@ -85,15 +85,19 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
             print(f"Added batch {index} of {math.ceil(len(embeddings)/batch_size)}")
 
     if collection.count() == 0:
-        batches(collection, embeddings, descriptions_for_embedding, list(description_list.keys()))
+        batches(collection, embeddings, all_texts, list(description_list.keys()))
     else:
         print('Collection has data')
 
     return collection, bm25_index, movieIds        
 
-collection, bm25_index, movieIds = create_collection('rag_db', movie_file, tags_file, 10000)
-with open('bm25/bm25_data.pkl', 'wb') as f:
-    pickle.dump(bm25_index, f)
+if __name__ == '__main__':
+    collection_name = sys.argv[1]
+    collection, bm25_index, movieIds = create_collection(collection_name, movie_file, tags_file, 30000)
+    with open('bm25/bm25_data.pkl', 'wb') as f:
+        pickle.dump(bm25_index, f)
+    with open('movie-info/movieIds.pkl', 'wb') as f:
+        pickle.dump(movieIds, f)        
 
-end_time = time.time()
-print(f"Time taken: {end_time-start_time}")
+    end_time = time.time()
+    print(f"Time taken: {end_time-start_time}")

@@ -2,22 +2,27 @@ from sklearn.neighbors import KNeighborsClassifier
 from rank_bm25 import BM25Okapi
 import chromadb
 import spacy
+import sys
 import numpy as np
 import pickle
 
 class Retrieval:
-    def __init__(self, collection, bm25_filepath):
+    def __init__(self, collection, bm25_filepath, movieIds_filepath):
         self.collection = collection
         with open(bm25_filepath, 'rb') as f:
             self.bm25_data = pickle.load(f)
+        with open(movieIds_filepath, 'rb') as f:
+            self.movieIds = pickle.load(f)
 
     def knn_search(self, query_vector, k=5):
         # chromadb implementation
-        return self.collection.query(
+        response = self.collection.query(
             query_texts=query_vector,
             n_results=k,
-            include=['distances']
+            include=['distances', 'documents']
         )
+        ids = response['ids']
+        return response, [self.movieIds[int(id)] for id in ids[0]]        
 
     def bm25_rank(self, query_text, k=5):
         # rank_bm25 implementation
@@ -40,11 +45,11 @@ class Retrieval:
 
 if __name__ == "__main__":
     client = chromadb.PersistentClient()
-    collection = client.get_collection('rag_db')
-    retrieval = Retrieval(collection, 'bm25/bm25_data.pkl')
+    cName = sys.argv[1]
+    collection = client.get_collection(cName)
+    retrieval = Retrieval(collection, 'bm25/bm25_data.pkl', 'movie-info/movieIds.pkl')
 
-    query = retrieval.knn_search(['horror movies'])['ids']
-    print(f"Horror movies: {query}") 
+    response, movies = retrieval.knn_search(['james bond movies'], 1)
+    print(f"Horror movies: {movies}") 
+    print(response['documents'])
 
-    query2 = retrieval.knn_search(['sad heartfelt rom coms'])['ids']
-    print(f"Sad heartfelt rom coms: {query2}") 
