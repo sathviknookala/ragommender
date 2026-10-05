@@ -21,7 +21,7 @@ def swipe(event: SwipeEvent):
 
 @app.post("/search")
 def search(req: SearchRequest):
-    result = retrieval.search(req.user_id, req.query, req.k, req.explain)
+    result = retrieval.search(req.user_id, req.query, req.k, req.explain, req.rewrite)
     items = [RecommendationItem(item_id=item['item_id'], title=item['title'], score=item['score'],
                                 preference_boost=item['preference_boost'], reason=item['reason'],
                                 explain=item.get('explain')) for item in result['items']]
@@ -31,7 +31,10 @@ def search(req: SearchRequest):
         'model_version': 'preference-v1',
         'cached': False,
         'preference_confidence': result['preference_confidence'],
-        'learned_weights': result['learned_weights']
+        'learned_weights': result['learned_weights'],
+        'rewritten_query': result['rewritten_query'],
+        'llm_used': result['llm_used'],
+        'llm_cached': result['llm_cached']
     }
 
 @app.get("/user/{user_id}/profile")

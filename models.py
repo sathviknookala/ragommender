@@ -13,6 +13,7 @@ class SearchRequest(BaseModel):
     query: str
     k: int = 20
     explain: bool = False
+    rewrite: bool = False
 
 class SurveyRequest(BaseModel):
     user_id: str

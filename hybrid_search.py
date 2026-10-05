@@ -57,7 +57,7 @@ class Retrieval:
                 results.append((movieId, self.movieIds[movieId], float(scores[idx])))
         return results
 
-    def hybrid_search(self, query_text, k=10, preference_vector=None, pref_weight=0.3):
+    def hybrid_search(self, query_text, k=10, preference_vector=None, pref_weight=0.3, bm25_text=None):
         # knn_search + bm25_rank fused with reciprocal rank fusion
         query_vec = self.model.encode(query_text, normalize_embeddings=True)
         if preference_vector is not None:
@@ -65,7 +65,7 @@ class Retrieval:
             query_vec = query_vec / np.linalg.norm(query_vec)
 
         _, knn_results = self.knn_search(k=k*3, query_embeddings=query_vec)
-        bm25_results = self.bm25_rank(query_text, k*3)
+        bm25_results = self.bm25_rank(bm25_text or query_text, k*3)
 
         fused = {}
         for rank, (movieId, title, _) in enumerate(knn_results, 1):
