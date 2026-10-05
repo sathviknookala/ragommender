@@ -13,7 +13,8 @@ model = os.environ.get('LLM_MODEL', '')
 # must match the server's --max-num-seqs
 max_concurrency = int(os.environ.get('LLM_MAX_CONCURRENCY', 8))
 background_slots = int(os.environ.get('LLM_BACKGROUND_SLOTS', 2))
-queue_timeout = float(os.environ.get('LLM_QUEUE_TIMEOUT', 2))
+# explain calls hold a slot ~4s at 8 concurrent, so wait about that long before falling back
+queue_timeout = float(os.environ.get('LLM_QUEUE_TIMEOUT', 4))
 llm_timeout = float(os.environ.get('LLM_TIMEOUT', 20))
 cooldown = float(os.environ.get('LLM_COOLDOWN', 30))
 cache_size = int(os.environ.get('LLM_CACHE_SIZE', 1000))
