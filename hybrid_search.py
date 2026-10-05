@@ -8,19 +8,27 @@ import numpy as np
 import pickle
 import re
 
-# hand-picked ranking weights, phase 1 measures them and phase 2 tunes them
+# phase 2 picked vector, preference, popularity and pref_sim on the eval (finalist b), the rest are hand-picked
 default_weights = {
-    'vector': 1.0,
+    # 0 skips the knn query, it lost to keyword only search on the eval
+    'vector': 0.0,
     'bm25': 1.0,
     'rrf_k': 60,
-    'preference': 0.3,
+    'preference': 0.0,
     'genre_boost': 0.002,
     'year_boost': 0.005,
-    'min_swipes': 5
+    'min_swipes': 5,
+    # added per candidate, scaled popularity (0..1) and cosine to the preference vector
+    'popularity': 0.01,
+    'pref_sim': 0.02
 }
 
-def fuse(knn_results, bm25_results, weights):
+# candidates fetched per list, popularity, pref_sim and the boosts re-sort the whole pool so it must match the eval's
+candidate_depth = 100
+
+def fuse(knn_results, bm25_results, weights, popularity=None, pref_sims=None):
     # weighted reciprocal rank fusion, a zero weight drops that retriever's list
+    # popularity and pref_sims are movieId -> value dicts, added on top of the fused score
     fused = {}
     for name, results in [('vector', knn_results), ('bm25', bm25_results)]:
         if weights[name] == 0:
@@ -30,11 +38,29 @@ def fuse(knn_results, bm25_results, weights):
                                               'vector_rank': None, 'bm25_rank': None})
             item['score'] += weights[name]/(weights['rrf_k']+rank)
             item[f'{name}_rank'] = rank
+    for movieId, item in fused.items():
+        if popularity and weights['popularity']:
+            item['score'] += weights['popularity'] * popularity.get(movieId, 0.0)
+        if pref_sims and weights['pref_sim']:
+            item['score'] += weights['pref_sim'] * pref_sims.get(movieId, 0.0)
     return sorted(fused.values(), key=lambda x: x['score'], reverse=True)
 
+def with_fallback(weights, bm25_results):
+    # with knn off, a query bm25 can't match (only stopwords, numbers, typos) would return nothing, so knn fills in
+    if not weights['vector'] and not bm25_results:
+        return dict(weights, vector=1.0)
+    return weights
+
 class Retrieval:
-    def __init__(self, collection, bm25_filepath, movieIds_filepath):
+    def __init__(self, collection, bm25_filepath, movieIds_filepath, popularity_filepath=None, popularity_key='all'):
         self.collection = collection
+        # movieId -> scaled log rating count from build_popularity.py, empty when the file isn't there
+        self.popularity = {}
+        if popularity_filepath and os.path.exists(popularity_filepath):
+            with open(popularity_filepath, 'rb') as f:
+                self.popularity = pickle.load(f)[popularity_key]
+        elif popularity_filepath:
+            print(f"warning: {popularity_filepath} not found, run build_popularity.py, popularity weight has no effect")
         with open(bm25_filepath, 'rb') as f:
             self.bm25_data = pickle.load(f)
         with open(movieIds_filepath, 'rb') as f:
@@ -99,12 +125,23 @@ class Retrieval:
     def hybrid_search(self, query_text, k=10, preference_vector=None, weights=None, bm25_text=None, year_range=None):
         # knn_search + bm25_rank fused with weighted reciprocal rank fusion
         weights = weights or default_weights
-        query_vec = self.blend(query_text, preference_vector, weights['preference'])
-
-        where = {'$and': [{'year': {'$gte': year_range[0]}}, {'year': {'$lte': year_range[1]}}]} if year_range else None
-        _, knn_results = self.knn_search(k=k*3, query_embeddings=query_vec, where=where)
-        bm25_results = self.bm25_rank(bm25_text or query_text, k*3, year_range=year_range)
-        return fuse(knn_results, bm25_results, weights)[:k]
+        depth = max(k, candidate_depth)
+        bm25_results = self.bm25_rank(bm25_text or query_text, depth, year_range=year_range)
+        weights = with_fallback(weights, bm25_results)
+        knn_results = []
+        # fuse drops a zero weight list anyway, so don't pay for the query embedding and the knn call
+        if weights['vector']:
+            query_vec = self.blend(query_text, preference_vector, weights['preference'])
+            where = {'$and': [{'year': {'$gte': year_range[0]}}, {'year': {'$lte': year_range[1]}}]} if year_range else None
+            _, knn_results = self.knn_search(k=depth, query_embeddings=query_vec, where=where)
+        pref_sims = None
+        ids = sorted({m for m, _, _ in knn_results + bm25_results})
+        if weights['pref_sim'] and preference_vector is not None and ids:
+            # cosine of every candidate to the preference vector, the embeddings come from chroma
+            got = self.collection.get(ids=[str(m) for m in ids], include=['embeddings'])
+            sims = np.asarray(got['embeddings']) @ np.asarray(preference_vector)
+            pref_sims = {int(i): float(s) for i, s in zip(got['ids'], sims)}
+        return fuse(knn_results, bm25_results, weights, self.popularity, pref_sims)[:k]
 
 if __name__ == "__main__":
     client = chromadb.PersistentClient()

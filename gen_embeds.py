@@ -20,22 +20,32 @@ nlp = spacy.load("en_core_web_sm")
 model = SentenceTransformer('all-MiniLM-L6-v2',device=device)
 print('Model loaded successfully')
 
-def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int):
+def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int, embed_top_tags: int = None):
     '''
-    Initializes chromadb collection and bm25 corpus for hybrid search
+    Initializes chromadb collection and bm25 corpus for hybrid search.
+    embed_top_tags embeds only the title, genres and that many most common distinct tags, bm25 still gets every tag
     '''
     description_list = {}
     movieIds = {}
     all_texts = []
+    embed_texts = []
     metadatas = []
 
     tags_grouped = tags_df.groupby('movieId')['tag'].apply(list).to_dict()
+    top_tags = {}
+    if embed_top_tags:
+        counts = (tags_df.dropna(subset=['tag'])
+                  .assign(tag=lambda d: d['tag'].astype(str).str.strip().str.lower())
+                  .groupby(['movieId', 'tag']).size().reset_index(name='n')
+                  .sort_values(['movieId', 'n', 'tag'], ascending=[True, False, True]))
+        top_tags = counts.groupby('movieId')['tag'].apply(lambda t: list(t[:embed_top_tags])).to_dict()
     for movie in movie_df[:k].itertuples():
         tags = tags_grouped.get(movie.movieId, [])
         clean_tags = [str(tag) for tag in tags if not pd.isna(tag) and tag!='']
         text = f"{movie.title} {movie.genres} {' '.join(clean_tags)}"
 
         all_texts.append(text)
+        embed_texts.append(f"{movie.title} {movie.genres} {' '.join(top_tags.get(movie.movieId, []))}" if embed_top_tags else text)
         description_list[str(movie.movieId)] = text
         movieIds[movie.movieId] = movie.title
 
@@ -55,7 +65,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     bm25_index = BM25Okapi(tokens_list)
 
     embeddings = model.encode(
-        all_texts,    
+        embed_texts,    
         normalize_embeddings=True,
         batch_size=512,
         show_progress_bar=True,
@@ -99,7 +109,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
             print(f"Added batch {index} of {math.ceil(len(embeddings)/batch_size)}")
 
     if collection.count() == 0:
-        batches(collection, embeddings, all_texts, list(description_list.keys()), metadatas)
+        batches(collection, embeddings, embed_texts, list(description_list.keys()), metadatas)
     else:
         print('Collection has data')
 

@@ -1,0 +1,3847 @@
+{
+ "split": "val",
+ "natural_queries": false,
+ "collection": "eval_db",
+ "rows": [
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.0",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.0
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.0938160718495778,
+    "ci95": [
+     0.08221076159134937,
+     0.10624531739500105
+    ]
+   },
+   "vs_default": {
+    "mean": 0.03719154333229505,
+    "ci95": [
+     0.028385856698245313,
+     0.04592661194798315
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.01",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.01
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.1704475745379832,
+    "ci95": [
+     0.1556664212281413,
+     0.18624656390323202
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11382304602070044,
+    "ci95": [
+     0.10039666156859502,
+     0.12817511636686965
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.02",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20444477404499695,
+    "ci95": [
+     0.18817783434622443,
+     0.2210315071890614
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1478202455277142,
+    "ci95": [
+     0.1333208605662249,
+     0.16184233768436493
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22654296314152517,
+    "ci95": [
+     0.2098432365032425,
+     0.2445616773046358
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16991843462424241,
+    "ci95": [
+     0.1532824212971801,
+     0.18659962886155132
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21692492578238073,
+    "ci95": [
+     0.19910724862726265,
+     0.23564525216831494
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16030039726509798,
+    "ci95": [
+     0.14362001238451386,
+     0.17748549874542832
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.16",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20904226069921883,
+    "ci95": [
+     0.19249875113655449,
+     0.22698778312466955
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15241773218193608,
+    "ci95": [
+     0.13643981984864303,
+     0.17061049197270764
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.0",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.0
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.059831264354387355,
+    "ci95": [
+     0.050555971090624686,
+     0.06875533516268048
+    ]
+   },
+   "vs_default": {
+    "mean": 0.0032067358371045975,
+    "ci95": [
+     -0.002636076539345344,
+     0.009467555837406579
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.01",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.01
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.1253397144140674,
+    "ci95": [
+     0.11230373547899605,
+     0.1382955411201204
+    ]
+   },
+   "vs_default": {
+    "mean": 0.06871518589678463,
+    "ci95": [
+     0.05936333349360277,
+     0.07840804172379363
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.02",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.17602157267269491,
+    "ci95": [
+     0.1595863955910367,
+     0.19151975851289904
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11939704415541214,
+    "ci95": [
+     0.1056056541421352,
+     0.13295493482992884
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2183207122174345,
+    "ci95": [
+     0.20093498415746855,
+     0.23505494979748423
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16169618370015176,
+    "ci95": [
+     0.14638411030488552,
+     0.17652871655662786
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2182296475789359,
+    "ci95": [
+     0.2006720972566196,
+     0.23550625287935897
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16160511906165312,
+    "ci95": [
+     0.14455037855145839,
+     0.17817763239591763
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.16",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20832195096067999,
+    "ci95": [
+     0.19250585854155794,
+     0.22505351938704035
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1516974224433972,
+    "ci95": [
+     0.1345055146224686,
+     0.17048634203251486
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.0",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.0
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.07334767460160163,
+    "ci95": [
+     0.06354985272202983,
+     0.08311201283748952
+    ]
+   },
+   "vs_default": {
+    "mean": 0.01672314608431888,
+    "ci95": [
+     0.012306605564902078,
+     0.02150875687774039
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.01",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.01
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.13700404916154185,
+    "ci95": [
+     0.12329353086761675,
+     0.15036859051059187
+    ]
+   },
+   "vs_default": {
+    "mean": 0.08037952064425911,
+    "ci95": [
+     0.07190339239600892,
+     0.08979946787097404
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.02",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.1818192650044581,
+    "ci95": [
+     0.16500272194434537,
+     0.1984231055329362
+    ]
+   },
+   "vs_default": {
+    "mean": 0.12519473648717536,
+    "ci95": [
+     0.11307873771695191,
+     0.1373240677552851
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21878801551859384,
+    "ci95": [
+     0.20033324932179913,
+     0.2363244175789239
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1621634870013111,
+    "ci95": [
+     0.14580406699777823,
+     0.1780269796834685
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21784336339959437,
+    "ci95": [
+     0.20180252899594192,
+     0.2358922093530908
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16121883488231162,
+    "ci95": [
+     0.14472771871086454,
+     0.17713901503190613
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.16",
+   "group": "popularity",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20281441169637052,
+    "ci95": [
+     0.18731523667048836,
+     0.2193646525063922
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14618988317908774,
+    "ci95": [
+     0.12911244679302894,
+     0.163733127747242
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.0",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.0
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.04052994154828608,
+    "ci95": [
+     0.03371211726777597,
+     0.047991542905225434
+    ]
+   },
+   "vs_default": {
+    "mean": -0.01609458696899668,
+    "ci95": [
+     -0.02143651594553232,
+     -0.010571271715780746
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.01",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.01
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.08867877968845303,
+    "ci95": [
+     0.07853096927547937,
+     0.10017424563320206
+    ]
+   },
+   "vs_default": {
+    "mean": 0.03205425117117027,
+    "ci95": [
+     0.024390747539838414,
+     0.0397600051704721
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.02",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.13640539469596114,
+    "ci95": [
+     0.1238347785582162,
+     0.15002133393396835
+    ]
+   },
+   "vs_default": {
+    "mean": 0.07978086617867837,
+    "ci95": [
+     0.06764466149903142,
+     0.09014206089177088
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.19749965985456225,
+    "ci95": [
+     0.18097745750382704,
+     0.21430676147424702
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1408751313372795,
+    "ci95": [
+     0.1257890262471381,
+     0.15576103705522404
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.212618766708939,
+    "ci95": [
+     0.19620552857759305,
+     0.23052195712072074
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15599423819165623,
+    "ci95": [
+     0.13955033112428877,
+     0.17279053499429295
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.16",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20939004375887726,
+    "ci95": [
+     0.19278958196821325,
+     0.22624968215880856
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1527655152415945,
+    "ci95": [
+     0.13579530483558705,
+     0.17039935930416916
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.0",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.0
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.05662452851728275,
+    "ci95": [
+     0.047806644602186005,
+     0.06520281926515965
+    ]
+   },
+   "vs_default": {
+    "mean": 0.0,
+    "ci95": [
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.01",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.01
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.10601365128875542,
+    "ci95": [
+     0.09488856880167791,
+     0.1193749931868019
+    ]
+   },
+   "vs_default": {
+    "mean": 0.04938912277147267,
+    "ci95": [
+     0.04292914983606501,
+     0.055977175974236765
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.02",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.14897320796707317,
+    "ci95": [
+     0.1350659727610139,
+     0.16345047733635742
+    ]
+   },
+   "vs_default": {
+    "mean": 0.09234867944979042,
+    "ci95": [
+     0.08218604003525871,
+     0.10271552531254291
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.19937904767841616,
+    "ci95": [
+     0.18295864888778404,
+     0.21557909935997974
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14275451916113338,
+    "ci95": [
+     0.1288016081493303,
+     0.15847039386572412
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21402295725603276,
+    "ci95": [
+     0.19694810892708564,
+     0.23258939008959734
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15739842873875004,
+    "ci95": [
+     0.14201367179549163,
+     0.1747499835670106
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.16",
+   "group": "popularity",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20447674560773046,
+    "ci95": [
+     0.18681823310046825,
+     0.22148067929333182
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1478522170904477,
+    "ci95": [
+     0.13156627335191384,
+     0.1649893390754192
+    ]
+   }
+  },
+  {
+   "name": "vec=0 global-vector prior sim=0.02",
+   "group": "global_vector_prior",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.14790138079629844,
+    "ci95": [
+     0.1330912203024673,
+     0.16174691351717696
+    ]
+   },
+   "vs_default": {
+    "mean": 0.09127685227901568,
+    "ci95": [
+     0.07933340402997874,
+     0.10483430276872199
+    ]
+   }
+  },
+  {
+   "name": "vec=0 global-vector prior sim=0.04",
+   "group": "global_vector_prior",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.1599335889249325,
+    "ci95": [
+     0.14483536047767684,
+     0.17580137605233562
+    ]
+   },
+   "vs_default": {
+    "mean": 0.10330906040764973,
+    "ci95": [
+     0.09049536531289738,
+     0.11653701620287663
+    ]
+   }
+  },
+  {
+   "name": "vec=0 global-vector prior sim=0.08",
+   "group": "global_vector_prior",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.15701980876868027,
+    "ci95": [
+     0.1423672156874697,
+     0.17194042394051612
+    ]
+   },
+   "vs_default": {
+    "mean": 0.10039528025139752,
+    "ci95": [
+     0.08684763031701848,
+     0.11331687429852343
+    ]
+   }
+  },
+  {
+   "name": "vec=0 global-vector prior sim=0.16",
+   "group": "global_vector_prior",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.1442024212236291,
+    "ci95": [
+     0.13028769892593636,
+     0.1588795397788867
+    ]
+   },
+   "vs_default": {
+    "mean": 0.08757789270634633,
+    "ci95": [
+     0.07314247041430486,
+     0.10202894535583983
+    ]
+   }
+  },
+  {
+   "name": "vec=0 global-vector prior sim=0.32",
+   "group": "global_vector_prior",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "pref_sim": 0.32
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.13914717112050332,
+    "ci95": [
+     0.12465015766632903,
+     0.1531001988310723
+    ]
+   },
+   "vs_default": {
+    "mean": 0.08252264260322055,
+    "ci95": [
+     0.0684418882308072,
+     0.09561234188599892
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22896971931385446,
+    "ci95": [
+     0.21071651088158533,
+     0.24700053323757634
+    ]
+   },
+   "vs_default": {
+    "mean": 0.17234519079657168,
+    "ci95": [
+     0.15454639188731126,
+     0.18900884958288072
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.22356802790485797,
+    "ci95": [
+     0.20539058320603434,
+     0.2409575709551695
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16694349938757522,
+    "ci95": [
+     0.15052364246842936,
+     0.18391225287096796
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.2266265195531163,
+    "ci95": [
+     0.20824780633735504,
+     0.24341430613152232
+    ]
+   },
+   "vs_default": {
+    "mean": 0.17000199103583352,
+    "ci95": [
+     0.1514696471448345,
+     0.18587627974963605
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22494949186136917,
+    "ci95": [
+     0.20808750989869906,
+     0.2434893641606838
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16832496334408645,
+    "ci95": [
+     0.15282391867385223,
+     0.18544194146899037
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21302136245318454,
+    "ci95": [
+     0.19621709658228442,
+     0.2302363508130105
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15639683393590176,
+    "ci95": [
+     0.14053622121477105,
+     0.17446737785828034
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21937899704327632,
+    "ci95": [
+     0.20313558325747497,
+     0.23748793049631436
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1627544685259936,
+    "ci95": [
+     0.14578867387723207,
+     0.17861209445372886
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21441540611690307,
+    "ci95": [
+     0.19711108613165998,
+     0.23106600792181628
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15779087759962035,
+    "ci95": [
+     0.14149876300298164,
+     0.17621971057270885
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.19513713495832075,
+    "ci95": [
+     0.17875973585291965,
+     0.21081183461561884
+    ]
+   },
+   "vs_default": {
+    "mean": 0.138512606441038,
+    "ci95": [
+     0.1220568627513682,
+     0.15504541350692747
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20686125353521484,
+    "ci95": [
+     0.19002683926308428,
+     0.2226035347365714
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15023672501793212,
+    "ci95": [
+     0.1328469564108065,
+     0.16615713528237364
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.1961883586677989,
+    "ci95": [
+     0.1792151161947092,
+     0.21285606243491942
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13956383015051613,
+    "ci95": [
+     0.12290313633461257,
+     0.1562534120052969
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.17515167426618594,
+    "ci95": [
+     0.15831246532953527,
+     0.18982911224008467
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11852714574890319,
+    "ci95": [
+     0.10281887999514948,
+     0.13484326792325127
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.04 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.1919784010045836,
+    "ci95": [
+     0.1751890479161285,
+     0.20958603368958925
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1353538724873008,
+    "ci95": [
+     0.11969784224291695,
+     0.15129564982130692
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22122969144605617,
+    "ci95": [
+     0.2043486920197243,
+     0.23915226930342823
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16460516292877342,
+    "ci95": [
+     0.1469011856791193,
+     0.18216366927820157
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.2193263083604985,
+    "ci95": [
+     0.2016767166127593,
+     0.23647165839161355
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16270177984321577,
+    "ci95": [
+     0.14613989324898694,
+     0.1800400515023088
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21948913659710223,
+    "ci95": [
+     0.1997496909036383,
+     0.2350775352340331
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1628646080798195,
+    "ci95": [
+     0.14631955262359236,
+     0.18220259251117335
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22183237057037514,
+    "ci95": [
+     0.203941818555102,
+     0.23855137613137073
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16520784205309239,
+    "ci95": [
+     0.14790867496025584,
+     0.1821794830941145
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21876829321935404,
+    "ci95": [
+     0.20287946148441807,
+     0.23759055938834261
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16214376470207129,
+    "ci95": [
+     0.14451517797636199,
+     0.17984487137778865
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.2195597833322831,
+    "ci95": [
+     0.20243643152644905,
+     0.23703420659283073
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16293525481500037,
+    "ci95": [
+     0.14561428329302792,
+     0.18098241826206343
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2177068166271601,
+    "ci95": [
+     0.200770443788908,
+     0.2350940963423631
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1610822881098774,
+    "ci95": [
+     0.14470111848539127,
+     0.179211388720901
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.2084147062117452,
+    "ci95": [
+     0.19264139039958658,
+     0.2257117325870571
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15179017769446249,
+    "ci95": [
+     0.13490106134705412,
+     0.17051198367155618
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21114028907330343,
+    "ci95": [
+     0.1939296771292111,
+     0.22899850617389442
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1545157605560207,
+    "ci95": [
+     0.13746672112733255,
+     0.16921262493333347
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2066569376276609,
+    "ci95": [
+     0.18971907851006498,
+     0.22436649157762417
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15003240911037818,
+    "ci95": [
+     0.13340464562108084,
+     0.16803851049107374
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.1930454453608506,
+    "ci95": [
+     0.1758520823950491,
+     0.21083663277697884
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13642091684356786,
+    "ci95": [
+     0.11934197276406883,
+     0.15310614840215023
+    ]
+   }
+  },
+  {
+   "name": "vec=0.0 blend=0.0 pop=0.08 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20160957258705245,
+    "ci95": [
+     0.18524689445943043,
+     0.21863006105727892
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14498504406976973,
+    "ci95": [
+     0.1278669090206819,
+     0.1615922540049958
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22498620695061203,
+    "ci95": [
+     0.2059351798433833,
+     0.24330239647299973
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16836167843332928,
+    "ci95": [
+     0.15326560650303597,
+     0.1846285398407773
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.2156754810586103,
+    "ci95": [
+     0.1999378114981302,
+     0.23253538409712304
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15905095254132756,
+    "ci95": [
+     0.14356663084009827,
+     0.1744349695472381
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.22099426195806035,
+    "ci95": [
+     0.20413887771570463,
+     0.23995305098690536
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1643697334407776,
+    "ci95": [
+     0.14721766371964104,
+     0.1804612662807752
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22431051259904902,
+    "ci95": [
+     0.20660984679133007,
+     0.24188450929693903
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16768598408176627,
+    "ci95": [
+     0.15079367660938706,
+     0.18481168537537765
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21035986311077032,
+    "ci95": [
+     0.1927854572385812,
+     0.22760857846060734
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1537353345934875,
+    "ci95": [
+     0.1384263021336793,
+     0.16870704370739048
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21785438893056214,
+    "ci95": [
+     0.20188272353293912,
+     0.23469353895639344
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16122986041327936,
+    "ci95": [
+     0.1450410008745053,
+     0.1778029575495012
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21510976932712658,
+    "ci95": [
+     0.1979640728698113,
+     0.2323485427115326
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15848524080984383,
+    "ci95": [
+     0.1433671425414272,
+     0.1744658111531623
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.19463566469698412,
+    "ci95": [
+     0.17824110420444486,
+     0.21174738336536236
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13801113617970137,
+    "ci95": [
+     0.12250392398385494,
+     0.15324087011732107
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20755323148259675,
+    "ci95": [
+     0.19159636826114762,
+     0.22402527519334609
+    ]
+   },
+   "vs_default": {
+    "mean": 0.150928702965314,
+    "ci95": [
+     0.13576501957474474,
+     0.1671525543430545
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.1939126015826467,
+    "ci95": [
+     0.17728963024267516,
+     0.20941528726104866
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13728807306536392,
+    "ci95": [
+     0.12333137541042448,
+     0.15288934875374927
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.17301057053824814,
+    "ci95": [
+     0.15769572376707786,
+     0.18794117734597388
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11638604202096538,
+    "ci95": [
+     0.10105810239537691,
+     0.13217650951725926
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.04 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.19027293384886024,
+    "ci95": [
+     0.1742369123319562,
+     0.20634873312443247
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1336484053315775,
+    "ci95": [
+     0.11852520310731605,
+     0.14965320617672156
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22298387318853635,
+    "ci95": [
+     0.20461673787381598,
+     0.24062604584938613
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16635934467125357,
+    "ci95": [
+     0.14952016212790029,
+     0.18452773137003653
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.2200907887091204,
+    "ci95": [
+     0.20135509116365027,
+     0.23811452531893576
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1634662601918377,
+    "ci95": [
+     0.14739041028914407,
+     0.18132375457482097
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.22003144148431417,
+    "ci95": [
+     0.20262651233084522,
+     0.23720802775485786
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16340691296703141,
+    "ci95": [
+     0.1464144416908077,
+     0.17971860453743269
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22276085459918954,
+    "ci95": [
+     0.20537697690879467,
+     0.24101892723382243
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16613632608190676,
+    "ci95": [
+     0.14912730968177612,
+     0.18246605066901192
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21871168906431626,
+    "ci95": [
+     0.2017220955372537,
+     0.23782853126765321
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1620871605470335,
+    "ci95": [
+     0.14530318223516178,
+     0.1799772127811362
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.22114091369552547,
+    "ci95": [
+     0.20376583077304594,
+     0.24077172841542802
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16451638517824269,
+    "ci95": [
+     0.1472825812105262,
+     0.1820974389387375
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21961524293297546,
+    "ci95": [
+     0.20289395427680165,
+     0.23652367742050842
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1629907144156927,
+    "ci95": [
+     0.14703124195817657,
+     0.18060383505590538
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.20903056530742933,
+    "ci95": [
+     0.19347855614129228,
+     0.22532660811394792
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1524060367901466,
+    "ci95": [
+     0.1342619174870003,
+     0.17031732527011675
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21211674522844098,
+    "ci95": [
+     0.19597745393300953,
+     0.22894660225802166
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15549221671115823,
+    "ci95": [
+     0.13980403938880448,
+     0.17214104276629333
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2070963652888428,
+    "ci95": [
+     0.19104356905424746,
+     0.22328398277605724
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15047183677156,
+    "ci95": [
+     0.13483696777009666,
+     0.16716587899328608
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.19149117795824697,
+    "ci95": [
+     0.1745598583228762,
+     0.20762353417329052
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1348666494409642,
+    "ci95": [
+     0.11722390163858577,
+     0.1529087578279541
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.0 pop=0.08 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20263940211254103,
+    "ci95": [
+     0.18698814244461523,
+     0.21876224674351022
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1460148735952583,
+    "ci95": [
+     0.12878870888689017,
+     0.1630832486334657
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22427214279340743,
+    "ci95": [
+     0.20626731521354755,
+     0.24261848879848794
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16764761427612465,
+    "ci95": [
+     0.15267467040203703,
+     0.182864657330881
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21447457553128257,
+    "ci95": [
+     0.19726374880644537,
+     0.23092431714398975
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15785004701399985,
+    "ci95": [
+     0.14175280818761368,
+     0.17415014819195934
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.22096179569061633,
+    "ci95": [
+     0.20231095502641908,
+     0.23837038519814963
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16433726717333355,
+    "ci95": [
+     0.14712334637585914,
+     0.17962966678397302
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21751185623893854,
+    "ci95": [
+     0.20180684951760558,
+     0.23511204587979867
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1608873277216558,
+    "ci95": [
+     0.14662391093781568,
+     0.17662600854752125
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.20658268817949116,
+    "ci95": [
+     0.1898288237638708,
+     0.22381964652032496
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14995815966220838,
+    "ci95": [
+     0.13499118956148165,
+     0.16593017419943346
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.2169034483571481,
+    "ci95": [
+     0.19889520527532056,
+     0.2336092734475986
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16027891983986534,
+    "ci95": [
+     0.1439994752033919,
+     0.176141730537941
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20232176458916015,
+    "ci95": [
+     0.18707291816350385,
+     0.2193990922361926
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14569723607187737,
+    "ci95": [
+     0.13081720726779322,
+     0.16102434042406238
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.18223408565275923,
+    "ci95": [
+     0.16556844988628097,
+     0.1982757738131978
+    ]
+   },
+   "vs_default": {
+    "mean": 0.12560955713547647,
+    "ci95": [
+     0.11055806516793891,
+     0.14161370987140212
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.19994669814250318,
+    "ci95": [
+     0.18370528079040022,
+     0.21685953504888608
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1433221696252204,
+    "ci95": [
+     0.12713278337122702,
+     0.15849264145167302
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.1732286430682429,
+    "ci95": [
+     0.1571014990225142,
+     0.18764027208140768
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11660411455096018,
+    "ci95": [
+     0.1006717174177437,
+     0.13203486705067807
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.1552300718552007,
+    "ci95": [
+     0.13979873133982856,
+     0.17081293692276445
+    ]
+   },
+   "vs_default": {
+    "mean": 0.09860554333791796,
+    "ci95": [
+     0.0837278817004898,
+     0.1141975232199041
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.04 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.17609683526069347,
+    "ci95": [
+     0.16112069367373824,
+     0.19116226813876147
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11947230674341074,
+    "ci95": [
+     0.10367237448708813,
+     0.13482482097698212
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21910879759331975,
+    "ci95": [
+     0.2014878726790279,
+     0.23639298653260216
+    ]
+   },
+   "vs_default": {
+    "mean": 0.162484269076037,
+    "ci95": [
+     0.146141056300339,
+     0.17893919680672685
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21719492044815777,
+    "ci95": [
+     0.2003858382143954,
+     0.23407895418911526
+    ]
+   },
+   "vs_default": {
+    "mean": 0.160570391930875,
+    "ci95": [
+     0.14444729410286863,
+     0.1793501191760899
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21840254564270953,
+    "ci95": [
+     0.20223034734623554,
+     0.23613115099102128
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16177801712542678,
+    "ci95": [
+     0.14573721807586945,
+     0.17900511660599427
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2168274011440199,
+    "ci95": [
+     0.20019352626878617,
+     0.2343358185246477
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16020287262673716,
+    "ci95": [
+     0.14395124969205425,
+     0.17743036671212936
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21363123454443575,
+    "ci95": [
+     0.196867982043151,
+     0.23137274138381198
+    ]
+   },
+   "vs_default": {
+    "mean": 0.157006706027153,
+    "ci95": [
+     0.1402554174693159,
+     0.1750576612508649
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21880923991034604,
+    "ci95": [
+     0.20292191505693674,
+     0.23673335151105754
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1621847113930633,
+    "ci95": [
+     0.14623466106008748,
+     0.1792067960949384
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2084194213048996,
+    "ci95": [
+     0.19120061376789413,
+     0.2252652386821677
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15179489278761688,
+    "ci95": [
+     0.13546491910638703,
+     0.16758764786967104
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.19997498026668833,
+    "ci95": [
+     0.18179287792279827,
+     0.21600378663093636
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14335045174940556,
+    "ci95": [
+     0.12730541242497032,
+     0.15991592856439538
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20442999819747004,
+    "ci95": [
+     0.1869556041044943,
+     0.2226623851618697
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14780546968018732,
+    "ci95": [
+     0.1308100081136799,
+     0.16593218750566238
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.18745599230992685,
+    "ci95": [
+     0.17083395477754093,
+     0.20364424720084798
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1308314637926441,
+    "ci95": [
+     0.11534471697337388,
+     0.14551002897380946
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.175238862960249,
+    "ci95": [
+     0.16046464085160558,
+     0.19176446482171375
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11861433444296625,
+    "ci95": [
+     0.10202497179009043,
+     0.1350509779462428
+    ]
+   }
+  },
+  {
+   "name": "vec=0.5 blend=0.3 pop=0.08 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 0.5,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.1865446510359764,
+    "ci95": [
+     0.17128412519534167,
+     0.20132087170273064
+    ]
+   },
+   "vs_default": {
+    "mean": 0.12992012251869364,
+    "ci95": [
+     0.1137722765885876,
+     0.14719003450683404
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21262997074597864,
+    "ci95": [
+     0.19691873692254774,
+     0.2292679756468518
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1560054422286959,
+    "ci95": [
+     0.14176683534778087,
+     0.17077154537894243
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.2041681594793098,
+    "ci95": [
+     0.18814517387520396,
+     0.22075575696098418
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14754363096202702,
+    "ci95": [
+     0.13220518252689886,
+     0.16247437069887194
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21007243041214413,
+    "ci95": [
+     0.19364141165952722,
+     0.22766471983771677
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1534479018948614,
+    "ci95": [
+     0.13776347527527819,
+     0.16880241377203892
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21297697358097661,
+    "ci95": [
+     0.19570627989854725,
+     0.2299753332900458
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1563524450636938,
+    "ci95": [
+     0.14142056983547352,
+     0.17218287245493716
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.19979934747436015,
+    "ci95": [
+     0.18207496679931123,
+     0.21689112917032058
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14317481895707737,
+    "ci95": [
+     0.12724182350011898,
+     0.15842337872977078
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21003290430346205,
+    "ci95": [
+     0.19374480937185132,
+     0.22645005235066878
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1534083757861793,
+    "ci95": [
+     0.13840128751627662,
+     0.169077089313426
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20848242629687141,
+    "ci95": [
+     0.1926697730634778,
+     0.22543780181900244
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1518578977795887,
+    "ci95": [
+     0.13589546362719118,
+     0.16832733873531452
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.18853633308867893,
+    "ci95": [
+     0.17210755085401294,
+     0.2044893235481619
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13191180457139615,
+    "ci95": [
+     0.11684998202943048,
+     0.1484919152170578
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20365878068567886,
+    "ci95": [
+     0.18765075492281513,
+     0.21886038122826862
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14703425216839605,
+    "ci95": [
+     0.13200656189050683,
+     0.1619743993948494
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.19113264868528998,
+    "ci95": [
+     0.17466255021649282,
+     0.207156189438064
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13450812016800723,
+    "ci95": [
+     0.11910249929828734,
+     0.1500198840197101
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.1724793448543251,
+    "ci95": [
+     0.1571028912709845,
+     0.18786112293362092
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11585481633704232,
+    "ci95": [
+     0.10050411051697188,
+     0.13238691610185144
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.04 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.1899780987430124,
+    "ci95": [
+     0.17330433253676533,
+     0.2062132552891728
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13335357022572966,
+    "ci95": [
+     0.11748771844345535,
+     0.1491264480557003
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2202611423185246,
+    "ci95": [
+     0.20253016561103276,
+     0.2366109978118506
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16363661380124186,
+    "ci95": [
+     0.14771484609615818,
+     0.18096792569374529
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21746749007440416,
+    "ci95": [
+     0.19956044708364487,
+     0.23432168624261812
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16084296155712144,
+    "ci95": [
+     0.14484063962626517,
+     0.17985074516111352
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21859564500667902,
+    "ci95": [
+     0.2013171772193038,
+     0.23614927622823872
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16197111648939627,
+    "ci95": [
+     0.14602142675724752,
+     0.1789761214939118
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.22269097057531312,
+    "ci95": [
+     0.2053443324302021,
+     0.24058738039455507
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16606644205803037,
+    "ci95": [
+     0.15012649590454075,
+     0.1827066980909702
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21603690520518645,
+    "ci95": [
+     0.19986932394970439,
+     0.23301734333972132
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15941237668790367,
+    "ci95": [
+     0.1425172537928885,
+     0.175041469136601
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21875029953010935,
+    "ci95": [
+     0.20223466945913168,
+     0.2366004627701025
+    ]
+   },
+   "vs_default": {
+    "mean": 0.16212577101282657,
+    "ci95": [
+     0.14506865658762438,
+     0.17830464491385667
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.21856007512605935,
+    "ci95": [
+     0.20202313117096116,
+     0.23554931755051886
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1619355466087766,
+    "ci95": [
+     0.1456037387996082,
+     0.17861321726576143
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.2081505935124585,
+    "ci95": [
+     0.19151998221681268,
+     0.22506533243963855
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15152606499517574,
+    "ci95": [
+     0.13556904557577085,
+     0.16838889448726138
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21213613575959975,
+    "ci95": [
+     0.19460023311079552,
+     0.2290226921001322
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15551160724231697,
+    "ci95": [
+     0.13831776435847445,
+     0.1709540226725356
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20659321641801,
+    "ci95": [
+     0.1896066053016042,
+     0.22309730600597313
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14996868790072726,
+    "ci95": [
+     0.13518173990813323,
+     0.166185477319546
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.19064801083540045,
+    "ci95": [
+     0.1735655629183866,
+     0.2074135918276488
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13402348231811773,
+    "ci95": [
+     0.11739703224385399,
+     0.150013613201628
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.0 pop=0.08 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.0,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20236191592553626,
+    "ci95": [
+     0.18588492668570308,
+     0.21886347619990854
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14573738740825348,
+    "ci95": [
+     0.12842627053607503,
+     0.16185244422975167
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20754136891923494,
+    "ci95": [
+     0.19062733939770954,
+     0.22501039420315427
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15091684040195216,
+    "ci95": [
+     0.13654207021461714,
+     0.1670527073976765
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.1977537652782515,
+    "ci95": [
+     0.1814195511745029,
+     0.214433114695693
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14112923676096875,
+    "ci95": [
+     0.12582577100035627,
+     0.15669390269666256
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20593732628057743,
+    "ci95": [
+     0.18830143578605124,
+     0.22236302104573694
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14931279776329467,
+    "ci95": [
+     0.13440644660849388,
+     0.1644408957094917
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20192772038345172,
+    "ci95": [
+     0.18480938769408373,
+     0.2200960656053371
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14530319186616897,
+    "ci95": [
+     0.13064944692081662,
+     0.15975515231587345
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.19086557687978964,
+    "ci95": [
+     0.17369731751243658,
+     0.20721912292156783
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13424104836250692,
+    "ci95": [
+     0.11957774618114897,
+     0.14899003529002933
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.2020284928800763,
+    "ci95": [
+     0.186703730623526,
+     0.21976038424507002
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14540396436279357,
+    "ci95": [
+     0.1295723516123347,
+     0.15978211303882325
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.19045373410959254,
+    "ci95": [
+     0.1746156913348951,
+     0.2067565629940893
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1338292055923098,
+    "ci95": [
+     0.11957379789529897,
+     0.14856008805358567
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.17415430430318754,
+    "ci95": [
+     0.15880334898712592,
+     0.18958775275507447
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11752977578590482,
+    "ci95": [
+     0.10229479855172799,
+     0.13266832104826512
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.19292294604729693,
+    "ci95": [
+     0.17651579357825398,
+     0.2093446571422287
+    ]
+   },
+   "vs_default": {
+    "mean": 0.13629841753001418,
+    "ci95": [
+     0.12171117419986426,
+     0.15112462075620026
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.16590055792449718,
+    "ci95": [
+     0.15057339545214463,
+     0.18071042683429234
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1092760294072144,
+    "ci95": [
+     0.09404453778743964,
+     0.1238823600432271
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.15153930371089616,
+    "ci95": [
+     0.13748143759324224,
+     0.16701490622132337
+    ]
+   },
+   "vs_default": {
+    "mean": 0.0949147751936134,
+    "ci95": [
+     0.07992897214557099,
+     0.1107675342977903
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.04 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.04,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.1729708665402445,
+    "ci95": [
+     0.15729097716315188,
+     0.18924227351410444
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11634633802296174,
+    "ci95": [
+     0.10173566574211593,
+     0.13240071563683806
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.02 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2161710866975809,
+    "ci95": [
+     0.20061330158522753,
+     0.23377191372789147
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15954655818029811,
+    "ci95": [
+     0.14292090925399034,
+     0.17577005584429278
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.02 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.21192061538121332,
+    "ci95": [
+     0.1950116545620729,
+     0.23021470969581903
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15529608686393057,
+    "ci95": [
+     0.13843907065094477,
+     0.17158026297577372
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.02 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.02
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.21180069604787707,
+    "ci95": [
+     0.1943988825704696,
+     0.22822257159201909
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15517616753059432,
+    "ci95": [
+     0.13774323200382252,
+     0.17212077752429727
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.04 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.2136706501371362,
+    "ci95": [
+     0.19641172462380926,
+     0.23073526149118423
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15704612161985343,
+    "ci95": [
+     0.14168054534038657,
+     0.1722733435336894
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.04 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.20735468835848103,
+    "ci95": [
+     0.190595702752973,
+     0.2246004518079876
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15073015984119828,
+    "ci95": [
+     0.13402746193895723,
+     0.16746440183703665
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.04 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.04
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.20871988154127913,
+    "ci95": [
+     0.19252489911026688,
+     0.2260311824566972
+    ]
+   },
+   "vs_default": {
+    "mean": 0.15209535302399638,
+    "ci95": [
+     0.1357550182307064,
+     0.16824164163098157
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.08 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.20417256640973883,
+    "ci95": [
+     0.18767143669949257,
+     0.22110633347420217
+    ]
+   },
+   "vs_default": {
+    "mean": 0.14754803789245605,
+    "ci95": [
+     0.13188845492295168,
+     0.1633573907080971
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.08 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.1964024463698134,
+    "ci95": [
+     0.1797375508709425,
+     0.2131045982922847
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1397779178525307,
+    "ci95": [
+     0.1228033960769401,
+     0.15491555118118733
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.08 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.08
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.1998606850483942,
+    "ci95": [
+     0.1833088404691843,
+     0.21864803802801214
+    ]
+   },
+   "vs_default": {
+    "mean": 0.1432361565311114,
+    "ci95": [
+     0.12661790116057145,
+     0.15927585352442142
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.16 [own]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "own",
+   "ndcg@10": {
+    "mean": 0.1844700058129042,
+    "ci95": [
+     0.16914111415598793,
+     0.20084611555985674
+    ]
+   },
+   "vs_default": {
+    "mean": 0.12784547729562143,
+    "ci95": [
+     0.11207512157801479,
+     0.1450543333307463
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.16 [shuffled]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "shuffled",
+   "ndcg@10": {
+    "mean": 0.17215538720212561,
+    "ci95": [
+     0.15658129141400917,
+     0.18631485155345906
+    ]
+   },
+   "vs_default": {
+    "mean": 0.11553085868484285,
+    "ci95": [
+     0.09859095533447161,
+     0.13230849737521125
+    ]
+   }
+  },
+  {
+   "name": "vec=1.0 blend=0.3 pop=0.08 sim=0.16 [global]",
+   "group": "pref_sim",
+   "overrides": {
+    "vector": 1.0,
+    "preference": 0.3,
+    "popularity": 0.08,
+    "pref_sim": 0.16
+   },
+   "mode": "global",
+   "ndcg@10": {
+    "mean": 0.18525381881650746,
+    "ci95": [
+     0.16965155292128767,
+     0.200701405510569
+    ]
+   },
+   "vs_default": {
+    "mean": 0.12862929029922468,
+    "ci95": [
+     0.1136191247836641,
+     0.14371045243618852
+    ]
+   }
+  }
+ ]
+}

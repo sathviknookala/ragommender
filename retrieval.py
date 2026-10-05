@@ -1,4 +1,4 @@
-from hybrid_search import Retrieval, default_weights
+from hybrid_search import Retrieval, default_weights, candidate_depth
 from preferences import record_swipe, get_latest_swipes, get_user_preferences, apply_boosts, genres_by_id
 from survey import get_survey_movies
 import chromadb
@@ -9,7 +9,7 @@ import time
 cName = os.environ.get('CHROMA_COLLECTION', 'rag_db')
 client = chromadb.PersistentClient()
 collection = client.get_collection(cName)
-retrieval = Retrieval(collection, 'bm25/bm25_data.pkl', 'movie-info/movieIds.pkl')
+retrieval = Retrieval(collection, 'bm25/bm25_data.pkl', 'movie-info/movieIds.pkl', 'movie-info/popularity.pkl')
 
 explain_top = 5
 all_genres = sorted({g for genres in genres_by_id.values() for g in genres} - {'(no genres listed)'})
@@ -31,6 +31,7 @@ def get_learned_weights(swipe_count: int):
     # cold start, only blend in the preference vector after min_swipes
     if swipe_count < weights['min_swipes']:
         weights['preference'] = 0.0
+        weights['pref_sim'] = 0.0
     return weights
 
 def swiped_titles(user_id: str, direction: str, n: int = 10):
@@ -84,7 +85,7 @@ def taste_summary(user_id: str, swipe_count: int):
 def search(user_id: str, query: str, k: int = 20, explain: bool = False, rewrite: bool = False):
     prefs = get_user_preferences(collection, user_id)
     weights = get_learned_weights(prefs['swipe_count'])
-    vector = prefs['preference_vector'] if weights['preference'] > 0 else None
+    vector = prefs['preference_vector'] if weights['preference'] > 0 or weights['pref_sim'] > 0 else None
     llm_calls = []
 
     rewritten = None
@@ -98,8 +99,8 @@ def search(user_id: str, query: str, k: int = 20, explain: bool = False, rewrite
     years = sorted(y for y in [rewritten.get('year_from'), rewritten.get('year_to')] if isinstance(y, int)) if rewritten else []
     year_range = (years[0], years[-1]) if years else None
 
-    # pull a wider pool when boosts can reorder it, then cut back to k
-    pool = k*3 if rewritten else k
+    # boost the whole candidate pool and cut to k after, as the eval does, a pool cut at k would drop candidates the boosts lift
+    pool = max(k*3, candidate_depth)
     results = retrieval.hybrid_search(query, pool, preference_vector=vector, weights=weights,
                                       bm25_text=bm25_text, year_range=year_range)
     if year_range and len(results) < k:
