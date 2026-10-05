@@ -3,7 +3,7 @@ import random
 import re
 
 core_genres = ['Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror', 'Romance']
-indexed = movie_file[:30000]
+indexed = movie_file
 
 def parse_year(title):
     match = re.search(r'\((\d{4})\)\s*$', title)

@@ -5,6 +5,7 @@ import chromadb
 import pandas as pd
 import spacy
 import pickle
+import re
 import time
 import torch
 import math
@@ -26,6 +27,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     description_list = {}
     movieIds = {}
     all_texts = []
+    metadatas = []
 
     tags_grouped = tags_df.groupby('movieId')['tag'].apply(list).to_dict()
     for movie in movie_df[:k].itertuples():
@@ -36,6 +38,16 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         all_texts.append(text)
         description_list[str(movie.movieId)] = text
         movieIds[movie.movieId] = movie.title
+
+        # chroma metadata values must be scalars, so genres get one boolean flag each for where filters
+        metadata = {'genres': movie.genres}
+        for genre in movie.genres.split('|'):
+            if genre != '(no genres listed)':
+                metadata[f'genre_{genre}'] = True
+        year = re.search(r'\((\d{4})\)\s*$', movie.title)
+        if year:
+            metadata['year'] = int(year.group(1))
+        metadatas.append(metadata)
 
     docs = list(nlp.pipe([text.lower() for text in all_texts], batch_size=1000))
     tokens_list = [[token.text for token in doc if token.is_alpha and not token.is_stop]
@@ -69,23 +81,25 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     )
     print('Creating collection')
 
-    def batches(collection, embeddings, documents, ids, batch_size=5400):
+    def batches(collection, embeddings, documents, ids, metadatas, batch_size=5400):
         for index, i in enumerate(range(0, len(embeddings), batch_size), 1):
             batch_end = min(len(embeddings), i+batch_size)
 
             batch_embeddings = embeddings[i:batch_end]
             batch_documents = documents[i:batch_end]
             batch_ids = ids[i:batch_end]
+            batch_metadatas = metadatas[i:batch_end]
 
             collection.add(
                 embeddings=batch_embeddings,
                 documents=batch_documents,
-                ids=batch_ids
+                ids=batch_ids,
+                metadatas=batch_metadatas
             )
             print(f"Added batch {index} of {math.ceil(len(embeddings)/batch_size)}")
 
     if collection.count() == 0:
-        batches(collection, embeddings, all_texts, list(description_list.keys()))
+        batches(collection, embeddings, all_texts, list(description_list.keys()), metadatas)
     else:
         print('Collection has data')
 
@@ -93,7 +107,9 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
 
 if __name__ == '__main__':
     collection_name = sys.argv[1]
-    collection, bm25_index, movieIds = create_collection(collection_name, movie_file, tags_file, 30000)
+    # optional second arg limits the number of movies, defaults to the whole catalog
+    k = int(sys.argv[2]) if len(sys.argv) > 2 else len(movie_file)
+    collection, bm25_index, movieIds = create_collection(collection_name, movie_file, tags_file, k)
     with open('bm25/bm25_data.pkl', 'wb') as f:
         pickle.dump(bm25_index, f)
     with open('movie-info/movieIds.pkl', 'wb') as f:
