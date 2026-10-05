@@ -14,7 +14,7 @@ start_time = time.time()
 # cuda dependent 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"Device being used: {device}")
-spacy.require_gpu()
+spacy.prefer_gpu()
 nlp = spacy.load("en_core_web_sm")
 model = SentenceTransformer('all-MiniLM-L6-v2',device=device)
 print('Model loaded successfully')
@@ -37,7 +37,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         description_list[str(movie.movieId)] = text
         movieIds[movie.movieId] = movie.title
 
-    docs = list(nlp.pipe(all_texts, batch_size=1000))
+    docs = list(nlp.pipe([text.lower() for text in all_texts], batch_size=1000))
     tokens_list = [[token.text for token in doc if token.is_alpha and not token.is_stop]
                    for doc in docs]         
     bm25_index = BM25Okapi(tokens_list)

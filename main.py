@@ -1,22 +1,33 @@
 from fastapi import FastAPI
-from retrieval import hybrid_search
-from retrieval import get_similar 
-from retrieval import get_user_profile
-import time
+from models import SwipeEvent, SearchRequest, SurveyRequest, RecommendationItem
+import retrieval
 
 app = FastAPI()
 
-@app.get("/v1/user/{user_id}")
+@app.post("/survey/start")
+def survey_start(req: SurveyRequest):
+    return retrieval.start_survey(req.user_id, req.survey_size)
+
+@app.post("/swipe")
+def swipe(event: SwipeEvent):
+    return retrieval.swipe(event)
+
+@app.post("/search")
+def search(req: SearchRequest):
+    result = retrieval.search(req.user_id, req.query, req.k)
+    items = [RecommendationItem(item_id=item['item_id'], title=item['title'], score=item['score'],
+                                preference_boost=item['preference_boost']) for item in result['items']]
+    return {
+        'user_id': req.user_id,
+        'items': items,
+        'model_version': 'preference-v1',
+        'cached': False,
+        'preference_confidence': result['preference_confidence']
+    }
+
+@app.get("/user/{user_id}/profile")
 def user_profile(user_id: str):
-    return get_user_profile(user_id)
-
-@app.get("/v1/similar/{user_id}")
-def similar(user_id: str):
-    return get_similar(user_id)
-
-@app.post("/v1/reommend")
-def recommend(user_id: str, k: int):
-    return hybrid_search(user_id, k)
+    return retrieval.get_user_profile(user_id)
 
 if __name__ == "__main__":
     print('testing')

@@ -1,0 +1,71 @@
+from get_user_profile import movie_file
+import numpy as np
+import os
+import pickle
+import time
+
+swipe_file = 'movie-info/swipes.pkl'
+# movieId -> genre list for the indexed movies
+genres_by_id = {row.movieId: row.genres.split('|') for row in movie_file[:30000].itertuples()}
+
+def load_swipes():
+    if not os.path.exists(swipe_file):
+        return {}
+    with open(swipe_file, 'rb') as f:
+        return pickle.load(f)
+
+def record_swipe(swipe: dict):
+    # local stand-in for the dynamodb user_swipes table
+    swipes = load_swipes()
+    swipe = dict(swipe)
+    if not swipe.get('timestamp'):
+        swipe['timestamp'] = int(time.time())
+    user_swipes = swipes.setdefault(swipe['user_id'], [])
+    user_swipes.append(swipe)
+    with open(swipe_file, 'wb') as f:
+        pickle.dump(swipes, f)
+    return len(user_swipes)
+
+def get_swipes(user_id: str):
+    return load_swipes().get(user_id, [])
+
+def centroid(collection, ids):
+    if not ids:
+        return np.zeros(384)
+    embeddings = collection.get(ids=ids, include=['embeddings'])['embeddings']
+    return np.mean(np.asarray(embeddings), axis=0)
+
+def compute_preference_vector(collection, likes, dislikes):
+    # likes and dislikes are lists of item ids
+    if not likes:
+        return None
+    vector = centroid(collection, likes) - 0.5 * centroid(collection, dislikes)
+    norm = np.linalg.norm(vector)
+    if norm == 0:
+        return None
+    return vector / norm
+
+def get_user_preferences(collection, user_id: str):
+    swipes = get_swipes(user_id)
+    likes = [s['item_id'] for s in swipes if s['direction'] == 'like']
+    dislikes = [s['item_id'] for s in swipes if s['direction'] == 'dislike']
+    swipe_count = len(swipes)
+
+    counts = {}
+    for s in swipes:
+        for genre in genres_by_id.get(int(s['item_id']), []):
+            counts[genre] = counts.get(genre, 0) + (1 if s['direction'] == 'like' else -1)
+    genre_preferences = {genre: score/swipe_count for genre, score in counts.items()}
+
+    vector = compute_preference_vector(collection, likes, dislikes)
+    return {
+        'user_id': user_id,
+        'swipe_count': swipe_count,
+        'preference_vector': vector,
+        'genre_preferences': genre_preferences,
+        'confidence': min(1, swipe_count/25)
+    }
+
+if __name__ == '__main__':
+    print(len(genres_by_id))
+    print(get_swipes('nobody'))

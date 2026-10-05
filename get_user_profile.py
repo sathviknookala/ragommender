@@ -9,7 +9,7 @@ def get_user_profile(user_id: str):
         user = id_file.loc[user_id]
         return {'user_id': user, 'content': [], 'cached': False}
     except Exception as e:
-        return 'Error: {e}'
+        return f'Error: {e}'
     
 def similar(user_id: str):
     return {'similar_titles': [], 'cached': False}
