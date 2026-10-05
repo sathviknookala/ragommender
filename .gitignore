@@ -5,3 +5,5 @@ bm25/
 movie-info/*.csv
 movie-info/*.pkl
 movie-info/checksums.txt
+movie-info/*.tmp
+aws-rag-movie-recommender-mvp-playbook.md

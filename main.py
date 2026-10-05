@@ -1,8 +1,15 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from models import SwipeEvent, SearchRequest, SurveyRequest, RecommendationItem
+import llm
 import retrieval
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app):
+    yield
+    llm.close()
+
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/survey/start")
 def survey_start(req: SurveyRequest):
@@ -14,15 +21,17 @@ def swipe(event: SwipeEvent):
 
 @app.post("/search")
 def search(req: SearchRequest):
-    result = retrieval.search(req.user_id, req.query, req.k)
+    result = retrieval.search(req.user_id, req.query, req.k, req.explain)
     items = [RecommendationItem(item_id=item['item_id'], title=item['title'], score=item['score'],
-                                preference_boost=item['preference_boost']) for item in result['items']]
+                                preference_boost=item['preference_boost'], reason=item['reason'],
+                                explain=item.get('explain')) for item in result['items']]
     return {
         'user_id': req.user_id,
         'items': items,
         'model_version': 'preference-v1',
         'cached': False,
-        'preference_confidence': result['preference_confidence']
+        'preference_confidence': result['preference_confidence'],
+        'learned_weights': result['learned_weights']
     }
 
 @app.get("/user/{user_id}/profile")

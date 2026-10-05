@@ -24,6 +24,7 @@ class RecommendationItem(BaseModel):
     score: float
     preference_boost: float
     reason: list[str] = []
+    explain: Optional[dict] = None
 
 class UserPreferences(BaseModel):
     user_id: str

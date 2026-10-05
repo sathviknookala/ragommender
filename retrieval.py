@@ -10,20 +10,46 @@ client = chromadb.PersistentClient()
 collection = client.get_collection(cName)
 retrieval = Retrieval(collection, 'bm25/bm25_data.pkl', 'movie-info/movieIds.pkl')
 
-def search(user_id: str, query: str, k: int = 20):
+pref_weight = 0.3
+genre_boost = 0.002
+min_swipes = 5
+
+def get_learned_weights(swipe_count: int):
+    # fixed for now, rrf weights vector and bm25 ranks equally
+    return {
+        'vector': 0.5,
+        'bm25': 0.5,
+        'preference': pref_weight if swipe_count >= min_swipes else 0.0,
+        'genre_boost': genre_boost
+    }
+
+def search(user_id: str, query: str, k: int = 20, explain: bool = False):
     prefs = get_user_preferences(collection, user_id)
-    # cold start, only use the preference vector after 5 swipes
-    vector = prefs['preference_vector'] if prefs['swipe_count'] >= 5 else None
-    results = retrieval.hybrid_search(query, k, preference_vector=vector)
+    weights = get_learned_weights(prefs['swipe_count'])
+    # cold start, only use the preference vector after min_swipes
+    vector = prefs['preference_vector'] if weights['preference'] > 0 else None
+    results = retrieval.hybrid_search(query, k, preference_vector=vector, pref_weight=pref_weight)
 
     for item in results:
         boost = 0.0
+        reason = []
+        if item['vector_rank']:
+            reason.append(f"Semantic match for '{query}'")
+        if item['bm25_rank']:
+            reason.append(f"Keyword match for '{query}'")
         for genre in genres_by_id.get(int(item['item_id']), []):
-            boost += 0.002 * prefs['genre_preferences'].get(genre, 0)
+            weight = prefs['genre_preferences'].get(genre, 0)
+            boost += genre_boost * weight
+            if weight > 0:
+                reason.append(f"Matches your {genre} preference")
+        if explain:
+            item['explain'] = {'base_score': item['score'], 'vector_rank': item['vector_rank'],
+                               'bm25_rank': item['bm25_rank'], 'used_preference_vector': vector is not None}
         item['preference_boost'] = boost
         item['score'] += boost
+        item['reason'] = reason
     results.sort(key=lambda x: x['score'], reverse=True)
-    return {'items': results, 'preference_confidence': prefs['confidence']}
+    return {'items': results, 'preference_confidence': prefs['confidence'], 'learned_weights': weights}
 
 def get_user_profile(user_id: str):
     prefs = get_user_preferences(collection, user_id)
@@ -32,6 +58,7 @@ def get_user_profile(user_id: str):
         'user_id': user_id,
         'swipe_count': prefs['swipe_count'],
         'preference_confidence': prefs['confidence'],
+        'learned_weights': get_learned_weights(prefs['swipe_count']),
         'top_genres': [genre for genre in top_genres if prefs['genre_preferences'][genre] > 0][:5]
     }
 

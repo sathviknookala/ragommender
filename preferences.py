@@ -2,9 +2,11 @@ from get_user_profile import movie_file
 import numpy as np
 import os
 import pickle
+import threading
 import time
 
 swipe_file = 'movie-info/swipes.pkl'
+swipe_lock = threading.Lock()
 # movieId -> genre list for the indexed movies
 genres_by_id = {row.movieId: row.genres.split('|') for row in movie_file[:30000].itertuples()}
 
@@ -16,15 +18,19 @@ def load_swipes():
 
 def record_swipe(swipe: dict):
     # local stand-in for the dynamodb user_swipes table
-    swipes = load_swipes()
     swipe = dict(swipe)
     if not swipe.get('timestamp'):
         swipe['timestamp'] = int(time.time())
-    user_swipes = swipes.setdefault(swipe['user_id'], [])
-    user_swipes.append(swipe)
-    with open(swipe_file, 'wb') as f:
-        pickle.dump(swipes, f)
-    return len(user_swipes)
+    # serialize the read-modify-write so concurrent swipes aren't lost
+    with swipe_lock:
+        swipes = load_swipes()
+        user_swipes = swipes.setdefault(swipe['user_id'], [])
+        user_swipes.append(swipe)
+        # write then rename so readers never see a partial file
+        with open(swipe_file + '.tmp', 'wb') as f:
+            pickle.dump(swipes, f)
+        os.replace(swipe_file + '.tmp', swipe_file)
+        return len(user_swipes)
 
 def get_swipes(user_id: str):
     return load_swipes().get(user_id, [])
