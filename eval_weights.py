@@ -1,4 +1,4 @@
-from hybrid_search import Retrieval, default_weights, fuse, with_fallback, candidate_depth
+from hybrid_search import Retrieval, default_weights, fuse, with_fallback, candidate_depth, bm25_params
 from preferences import preferences_from_swipes, apply_boosts
 import chromadb
 import json
@@ -25,6 +25,10 @@ compare_name = next((a.split('=')[1] for a in sys.argv if a.startswith('--compar
 # --sweep tunes the popularity and preference similarity weights on val only, --final scores the picked candidates
 sweep = '--sweep' in sys.argv
 final = '--final' in sys.argv
+# --bm25=K1,B scores with other bm25 parameters, phase 2 ran at rank_bm25's defaults: --bm25=1.5,0.75
+bm25_arg = next(({'k1': float(k1), 'b': float(b)} for a in sys.argv if a.startswith('--bm25=')
+                 for k1, b in [a.split('=')[1].split(',')]), bm25_params)
+phase2_bm25 = {'k1': 1.5, 'b': 0.75}
 suffix = ('_natural' if natural else '') + ('' if collection_name == 'eval_db' else f'_{collection_name}')
 bootstrap_n = 1000
 # 4 is a bump when the cache layout changes, an older cache is rebuilt instead of misread
@@ -32,8 +36,10 @@ cache_version = 4
 popularity_file = 'movie-info/popularity.pkl'
 shuffle_seed = 1
 
-def cache_path(name):
-    return f"movie-info/eval_cache_v{cache_version}{'_natural' if natural else ''}{'' if name == 'eval_db' else f'_{name}'}.pkl"
+def cache_path(name, bm25=bm25_arg):
+    # caches at phase 2's bm25 parameters keep their original names, they predate the parameter
+    params = '' if bm25 == phase2_bm25 else f"_k1{bm25['k1']}_b{bm25['b']}"
+    return f"movie-info/eval_cache_v{cache_version}{'_natural' if natural else ''}{'' if name == 'eval_db' else f'_{name}'}{params}.pkl"
 
 def controls(entries, queries):
     # shuffled: each query gets another same-split user's preferences, global: everyone gets the mean preferences
@@ -81,29 +87,32 @@ def retrieve_all(retrieval, collection, queries):
     ids = sorted({m for e in entries for lists in [e['bm25']] + [l for k in e['knn'].values() for l in k.values()]
                   for m, _, _ in lists})
     emb = None
+    index = {m: i for i, m in enumerate(ids)}
     for i in range(0, len(ids), 5000):
-        got = np.asarray(collection.get(ids=[str(m) for m in ids[i:i+5000]], include=['embeddings'])['embeddings'], dtype=np.float32)
+        got = collection.get(ids=[str(m) for m in ids[i:i+5000]], include=['embeddings'])
         if emb is None:
             # the dimension comes from the first batch
-            emb = np.zeros((len(ids), got.shape[1]), dtype=np.float32)
-        emb[i:i+5000] = got
+            emb = np.zeros((len(ids), len(got['embeddings'][0])), dtype=np.float32)
+        # chroma returns rows in storage order, not request order, so each row is placed by its returned id
+        emb[[index[int(m)] for m in got['ids']]] = np.asarray(got['embeddings'], dtype=np.float32)
     return {'version': cache_version, 'depth': depth, 'collection': collection.name, 'n_queries': len(queries),
-            'entries': entries, 'emb_index': {m: i for i, m in enumerate(ids)}, 'emb': emb,
+            'entries': entries, 'emb_index': index, 'emb': emb,
             'shuffle': shuffle, 'global_vector': mean, 'global_genres': genres}
 
-def load_cache(name, queries):
-    # a cache from another format, collection or query set is rebuilt instead of silently misread
-    file = cache_path(name)
+def load_cache(name, queries, bm25=bm25_arg):
+    # a cache from another format, collection, query set or bm25 parameters is rebuilt instead of silently misread
+    file = cache_path(name, bm25)
     if os.path.exists(file) and '--refresh' not in sys.argv:
         with open(file, 'rb') as f:
             cache = pickle.load(f)
         if (isinstance(cache, dict) and cache.get('version') == cache_version and cache['collection'] == name
-                and cache['n_queries'] == len(queries) and cache['depth'] == depth):
+                and cache['n_queries'] == len(queries) and cache['depth'] == depth
+                and cache.get('bm25_params', phase2_bm25) == bm25):
             return cache
         print(f"{file} is an old or mismatched cache, rebuilding")
     collection = chromadb.PersistentClient().get_collection(name)
-    retrieval = Retrieval(collection, 'bm25/eval_bm25.pkl', 'movie-info/eval_movieIds.pkl')
-    cache = retrieve_all(retrieval, collection, queries)
+    retrieval = Retrieval(collection, 'bm25/eval_bm25.pkl', 'movie-info/eval_movieIds.pkl', bm25_params=bm25)
+    cache = dict(retrieve_all(retrieval, collection, queries), bm25_params=bm25)
     with open(file, 'wb') as f:
         pickle.dump(cache, f)
     return cache
@@ -206,9 +215,10 @@ variants = {
     # semantic only keeps the old 0.3 blend so it compares to the first baseline
     'vector_only': V(1.0, 0.0, 0.3, 0.0, 0.0),
     'bm25_only': V(0.0, 1.0, 0.0, 0.0, 0.0),
-    'no_personalization': V(0.0, 1.0, 0.0, 0.01, 0.0, genre_boost=0.0),
-    'preference_vector_only': V(0.0, 1.0, 0.0, 0.01, 0.02, genre_boost=0.0),
-    'genre_boost_only': V(0.0, 1.0, 0.0, 0.01, 0.0),
+    # the personalization ablations hold popularity at the shipped 0.005, the v2 results files ran them at 0.01
+    'no_personalization': V(0.0, 1.0, 0.0, 0.005, 0.0, genre_boost=0.0),
+    'preference_vector_only': V(0.0, 1.0, 0.0, 0.005, 0.02, genre_boost=0.0),
+    'genre_boost_only': V(0.0, 1.0, 0.0, 0.005, 0.0),
     'min_swipes_0': dict(min_swipes=0),
     'min_swipes_1': dict(min_swipes=1),
     'min_swipes_3': dict(min_swipes=3),

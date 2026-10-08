@@ -45,8 +45,9 @@ def get_latest_swipes(user_id: str):
     return list(latest.values())
 
 def centroid(collection, ids):
+    # 0 broadcasts against any embedding size
     if not ids:
-        return np.zeros(384)
+        return 0.0
     embeddings = collection.get(ids=ids, include=['embeddings'])['embeddings']
     return np.mean(np.asarray(embeddings), axis=0)
 

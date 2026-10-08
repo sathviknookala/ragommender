@@ -8,7 +8,8 @@ import numpy as np
 import pickle
 import re
 
-# phase 2 picked vector, preference, popularity and pref_sim on the eval (finalist b), the rest are hand-picked
+# phase 2 picked vector, preference and pref_sim on the eval (finalist b), phase 3 lowered popularity with the
+# bm25 change below, the rest are hand-picked
 default_weights = {
     # 0 skips the knn query, it lost to keyword only search on the eval
     'vector': 0.0,
@@ -19,12 +20,21 @@ default_weights = {
     'year_boost': 0.005,
     'min_swipes': 5,
     # added per candidate, scaled popularity (0..1) and cosine to the preference vector
-    'popularity': 0.01,
+    'popularity': 0.005,
     'pref_sim': 0.02
 }
 
 # candidates fetched per list, popularity, pref_sim and the boosts re-sort the whole pool so it must match the eval's
 candidate_depth = 100
+
+# bm25 k1 and b, tuned in phase 3 (eval_bm25.py). rank_bm25's defaults, which the pickles are built with, are 1.5 and
+# 0.75. a low b barely normalizes length, and indexed text grows with tag count, so it leans towards popular movies
+bm25_params = {'k1': 3.0, 'b': 0.1}
+
+# a collection names its embedding model in its metadata, collections without one were built with minilm
+default_embed_model = 'all-MiniLM-L6-v2'
+# qwen3 embeddings put an instruction before queries, documents are embedded without one
+query_prompts = {'Qwen/Qwen3-Embedding-0.6B': 'Instruct: Given a movie search, retrieve movies that match it\nQuery:'}
 
 def fuse(knn_results, bm25_results, weights, popularity=None, pref_sims=None):
     # weighted reciprocal rank fusion, a zero weight drops that retriever's list
@@ -52,7 +62,8 @@ def with_fallback(weights, bm25_results):
     return weights
 
 class Retrieval:
-    def __init__(self, collection, bm25_filepath, movieIds_filepath, popularity_filepath=None, popularity_key='all'):
+    def __init__(self, collection, bm25_filepath, movieIds_filepath, popularity_filepath=None, popularity_key='all',
+                 bm25_params=bm25_params):
         self.collection = collection
         # movieId -> scaled log rating count from build_popularity.py, empty when the file isn't there
         self.popularity = {}
@@ -63,6 +74,8 @@ class Retrieval:
             print(f"warning: {popularity_filepath} not found, run build_popularity.py, popularity weight has no effect")
         with open(bm25_filepath, 'rb') as f:
             self.bm25_data = pickle.load(f)
+        # get_scores reads k1 and b off the index, and the idf it stores doesn't depend on them
+        self.bm25_data.k1, self.bm25_data.b = bm25_params['k1'], bm25_params['b']
         with open(movieIds_filepath, 'rb') as f:
             self.movieIds = pickle.load(f)
         # bm25 corpus position i -> movieId
@@ -72,7 +85,9 @@ class Retrieval:
                                for i in self.idList])
         self.nlp = spacy.load('en_core_web_sm')
         device = os.environ.get('DEVICE', 'cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
+        model_name = (collection.metadata or {}).get('embed_model', default_embed_model)
+        self.model = SentenceTransformer(model_name, device=device)
+        self.query_prompt = query_prompts.get(model_name)
 
     def knn_search(self, query_vector=None, k=5, query_embeddings=None, where=None):
         # chromadb implementation, query_vector is query text, query_embeddings is a vector
@@ -116,7 +131,7 @@ class Retrieval:
         return results
 
     def blend(self, query_text, preference_vector=None, pref_weight=0.0):
-        query_vec = self.model.encode(query_text, normalize_embeddings=True)
+        query_vec = self.model.encode(query_text, prompt=self.query_prompt, normalize_embeddings=True)
         if preference_vector is not None and pref_weight > 0:
             query_vec = (1 - pref_weight) * query_vec + pref_weight * np.asarray(preference_vector)
             query_vec = query_vec / np.linalg.norm(query_vec)
