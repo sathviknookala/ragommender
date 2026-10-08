@@ -19,7 +19,10 @@ old_weights = {'vector': 1.0, 'bm25': 1.0, 'rrf_k': 60, 'preference': 0.3, 'genr
 # --natural swaps each tag for its llm paraphrase from eval_paraphrase.py
 natural = '--natural' in sys.argv
 # --collection=NAME scores another eval index, e.g. eval_db_clean25 from eval_build.py --clean-embed=25
-collection_name = next((a.split('=')[1] for a in sys.argv if a.startswith('--collection=')), 'eval_db')
+# the eval index that matches the shipped rag_db, phase 3 moved it to qwen3 on title, genres and the top 25 tags.
+# eval_db is minilm on the full text, what phases 1 and 2 ran on
+shipped_collection = 'eval_db_qwen3-embedding-0.6b_clean25'
+collection_name = next((a.split('=')[1] for a in sys.argv if a.startswith('--collection=')), shipped_collection)
 # --compare=NAME also scores that collection on the same queries and saves the paired difference
 compare_name = next((a.split('=')[1] for a in sys.argv if a.startswith('--compare=')), None)
 # --sweep tunes the popularity and preference similarity weights on val only, --final scores the picked candidates
@@ -215,10 +218,11 @@ variants = {
     # semantic only keeps the old 0.3 blend so it compares to the first baseline
     'vector_only': V(1.0, 0.0, 0.3, 0.0, 0.0),
     'bm25_only': V(0.0, 1.0, 0.0, 0.0, 0.0),
-    # the personalization ablations hold popularity at the shipped 0.005, the v2 results files ran them at 0.01
-    'no_personalization': V(0.0, 1.0, 0.0, 0.005, 0.0, genre_boost=0.0),
-    'preference_vector_only': V(0.0, 1.0, 0.0, 0.005, 0.02, genre_boost=0.0),
-    'genre_boost_only': V(0.0, 1.0, 0.0, 0.005, 0.0),
+    # the personalization ablations hold vector and popularity at the shipped values so they differ only in
+    # personalization: v2 ran them at vector 0 and popularity 0.01, v3 at vector 0 and 0.005, v4 at 0.25 and 0.01
+    'no_personalization': V(0.25, 1.0, 0.0, 0.01, 0.0, genre_boost=0.0),
+    'preference_vector_only': V(0.25, 1.0, 0.0, 0.01, 0.02, genre_boost=0.0),
+    'genre_boost_only': V(0.25, 1.0, 0.0, 0.01, 0.0),
     'min_swipes_0': dict(min_swipes=0),
     'min_swipes_1': dict(min_swipes=1),
     'min_swipes_3': dict(min_swipes=3),

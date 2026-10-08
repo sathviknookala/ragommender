@@ -8,11 +8,11 @@ import numpy as np
 import pickle
 import re
 
-# phase 2 picked vector, preference and pref_sim on the eval (finalist b), phase 3 lowered popularity with the
-# bm25 change below, the rest are hand-picked
+# phase 3 picked vector, preference, popularity, pref_sim and genre_boost on the eval with the qwen3 index and the
+# bm25 parameters below (eval_embed.py), the rest are hand-picked
 default_weights = {
-    # 0 skips the knn query, it lost to keyword only search on the eval
-    'vector': 0.0,
+    # 0 would skip the knn query, minilm's knn lost to keyword only search, qwen3's earns a small weight
+    'vector': 0.25,
     'bm25': 1.0,
     'rrf_k': 60,
     'preference': 0.0,
@@ -20,7 +20,7 @@ default_weights = {
     'year_boost': 0.005,
     'min_swipes': 5,
     # added per candidate, scaled popularity (0..1) and cosine to the preference vector
-    'popularity': 0.005,
+    'popularity': 0.01,
     'pref_sim': 0.02
 }
 

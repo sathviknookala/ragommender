@@ -1,4 +1,5 @@
 from gen_embeds import create_collection
+from hybrid_search import default_embed_model
 from get_user_profile import movie_file, tags_file
 import numpy as np
 import pandas as pd
@@ -76,19 +77,29 @@ if __name__ == '__main__':
     queries, test_users = build_queries(rng)
     config = {'seed': seed, 'test_users': len(test_users), 'min_tag_users': min_tag_users,
               'max_relevant': max_relevant, 'min_ratings': min_ratings, 'queries_per_user': queries_per_user}
-    with open(queries_file, 'wb') as f:
-        pickle.dump({'config': config, 'queries': queries}, f)
-    print(f"{len(queries)} queries from {len(test_users)} test users, {time.time()-start:.0f}s")
-
     # --clean-embed=N builds eval_db_cleanN, embedding only the top N tags, bm25 is unchanged so its pickle is reused
     clean = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--clean-embed=')), None)
+    # --embed-model=NAME embeds with another model, e.g. Qwen/Qwen3-Embedding-0.6B, into eval_db_<model>[_cleanN]
+    embed_model = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--embed-model=')), default_embed_model)
+    variant = clean or embed_model != default_embed_model
+    if variant:
+        # a variant index is scored against the existing queries, so they are checked, not rewritten
+        with open(queries_file, 'rb') as f:
+            assert pickle.load(f)['queries'] == queries, f'rebuilt queries differ from {queries_file}'
+    else:
+        with open(queries_file, 'wb') as f:
+            pickle.dump({'config': config, 'queries': queries}, f)
+    print(f"{len(queries)} queries from {len(test_users)} test users, {time.time()-start:.0f}s")
+
     if '--queries-only' not in sys.argv:
         # the eval index leaves out every tag the test users wrote, so a query can't match its own tag
         held_out_tags = tags_file[~tags_file['userId'].isin(test_users)]
         print(f"indexing with {len(held_out_tags)} of {len(tags_file)} tag applications")
-        name = f'{eval_collection}_clean{clean}' if clean else eval_collection
-        collection, bm25_index, movieIds = create_collection(name, movie_file, held_out_tags, len(movie_file), embed_top_tags=clean)
-        if not clean:
+        name = (eval_collection + ('' if embed_model == default_embed_model else '_' + embed_model.split('/')[-1].lower())
+                + (f'_clean{clean}' if clean else ''))
+        collection, bm25_index, movieIds = create_collection(name, movie_file, held_out_tags, len(movie_file),
+                                                             embed_top_tags=clean, embed_model=embed_model)
+        if not variant:
             with open(eval_bm25_file, 'wb') as f:
                 pickle.dump(bm25_index, f)
             with open(eval_movieIds_file, 'wb') as f:

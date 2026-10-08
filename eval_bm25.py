@@ -1,6 +1,5 @@
 from eval_weights import (load_queries, load_cache, evaluate, summarize, by_split, by_bucket, balanced_by_split, tail_vs,
-                          popularity_buckets, old_weights, candidates, depth, natural, collection_name, popularity_file,
-                          phase2_bm25)
+                          popularity_buckets, old_weights, candidates, depth, natural, popularity_file, phase2_bm25)
 import chromadb
 import json
 import numpy as np
@@ -15,6 +14,8 @@ import time
 sweep = '--sweep' in sys.argv
 final = '--final' in sys.argv
 suffix = '_natural' if natural else ''
+# the sweep ran on the minilm index that shipped at the time
+collection_name = 'eval_db'
 # rank_bm25's defaults, shipped until this sweep, the sweep rescores the eval cache built with them
 shipped = (phase2_bm25['k1'], phase2_bm25['b'])
 k1_values = [0.5, 0.9, 1.2, 1.5, 2.0, 3.0]

@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
+from hybrid_search import default_embed_model
 from get_user_profile import movie_file, tags_file
 import chromadb
 import pandas as pd
@@ -17,14 +18,19 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"Device being used: {device}")
 spacy.prefer_gpu()
 nlp = spacy.load("en_core_web_sm")
-model = SentenceTransformer('all-MiniLM-L6-v2',device=device)
-print('Model loaded successfully')
+# texts longer than this many tokens are truncated, minilm's own limit is 256
+max_seq_length = 512
 
-def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int, embed_top_tags: int = None):
+def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int, embed_top_tags: int = None,
+                      embed_model: str = default_embed_model):
     '''
     Initializes chromadb collection and bm25 corpus for hybrid search.
     embed_top_tags embeds only the title, genres and that many most common distinct tags, bm25 still gets every tag
+    embed_model is recorded in the collection's metadata so Retrieval encodes queries with the same model
     '''
+    model = SentenceTransformer(embed_model, device=device)
+    model.max_seq_length = min(model.max_seq_length, max_seq_length)
+    print(f'{embed_model} loaded, max_seq_length {model.max_seq_length}')
     description_list = {}
     movieIds = {}
     all_texts = []
@@ -67,7 +73,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     embeddings = model.encode(
         embed_texts,    
         normalize_embeddings=True,
-        batch_size=512,
+        batch_size=512 if embed_model == default_embed_model else 32,
         show_progress_bar=True,
         convert_to_tensor=True
         ).tolist()
@@ -80,6 +86,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
 
     collection = client.create_collection(
         name=collection_name,
+        metadata={'embed_model': embed_model},
         configuration={
             'hnsw': {
                 'space': 'cosine',
@@ -116,10 +123,15 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
     return collection, bm25_index, movieIds        
 
 if __name__ == '__main__':
-    collection_name = sys.argv[1]
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    collection_name = args[0]
     # optional second arg limits the number of movies, defaults to the whole catalog
-    k = int(sys.argv[2]) if len(sys.argv) > 2 else len(movie_file)
-    collection, bm25_index, movieIds = create_collection(collection_name, movie_file, tags_file, k)
+    k = int(args[1]) if len(args) > 1 else len(movie_file)
+    # the shipped index (phase 3): python gen_embeds.py rag_db --clean-embed=25 --embed-model=Qwen/Qwen3-Embedding-0.6B
+    clean = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--clean-embed=')), None)
+    embed_model = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--embed-model=')), default_embed_model)
+    collection, bm25_index, movieIds = create_collection(collection_name, movie_file, tags_file, k, embed_top_tags=clean,
+                                                         embed_model=embed_model)
     with open('bm25/bm25_data.pkl', 'wb') as f:
         pickle.dump(bm25_index, f)
     with open('movie-info/movieIds.pkl', 'wb') as f:
