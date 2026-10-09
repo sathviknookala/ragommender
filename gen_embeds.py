@@ -2,6 +2,7 @@ from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
 from hybrid_search import default_embed_model
 from get_user_profile import movie_file, tags_file
+from fetch_tmdb import load_overviews, tmdb_file
 import chromadb
 import pandas as pd
 import spacy
@@ -22,11 +23,13 @@ nlp = spacy.load("en_core_web_sm")
 max_seq_length = 512
 
 def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.DataFrame, k: int, embed_top_tags: int = None,
-                      embed_model: str = default_embed_model):
+                      embed_model: str = default_embed_model, overviews: dict = None):
     '''
     Initializes chromadb collection and bm25 corpus for hybrid search.
     embed_top_tags embeds only the title, genres and that many most common distinct tags, bm25 still gets every tag
     embed_model is recorded in the collection's metadata so Retrieval encodes queries with the same model
+    overviews (movieId -> tmdb overview, fetch_tmdb.load_overviews) go into the embedded text and the stored
+    document after the genres, bm25 stays on title, genres and tags
     '''
     model = SentenceTransformer(embed_model, device=device)
     model.max_seq_length = min(model.max_seq_length, max_seq_length)
@@ -51,7 +54,10 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         text = f"{movie.title} {movie.genres} {' '.join(clean_tags)}"
 
         all_texts.append(text)
-        embed_texts.append(f"{movie.title} {movie.genres} {' '.join(top_tags.get(movie.movieId, []))}" if embed_top_tags else text)
+        tag_text = ' '.join(top_tags.get(movie.movieId, [])) if embed_top_tags else ' '.join(clean_tags)
+        overview = (overviews or {}).get(movie.movieId)
+        # without an overview this is the same text as before overviews existed
+        embed_texts.append(f"{movie.title} {movie.genres} {overview + ' ' if overview else ''}{tag_text}")
         description_list[str(movie.movieId)] = text
         movieIds[movie.movieId] = movie.title
 
@@ -86,7 +92,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
 
     collection = client.create_collection(
         name=collection_name,
-        metadata={'embed_model': embed_model},
+        metadata={'embed_model': embed_model, 'overviews': bool(overviews)},
         configuration={
             'hnsw': {
                 'space': 'cosine',
@@ -122,6 +128,14 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
 
     return collection, bm25_index, movieIds        
 
+def overviews_arg():
+    if '--overviews' not in sys.argv:
+        return None
+    overviews = load_overviews()
+    assert overviews, f'no overviews in {tmdb_file}, run fetch_tmdb.py first'
+    print(f"{len(overviews)} of {len(movie_file)} movies have a tmdb overview")
+    return overviews
+
 if __name__ == '__main__':
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     collection_name = args[0]
@@ -130,8 +144,10 @@ if __name__ == '__main__':
     # the shipped index (phase 3): python gen_embeds.py rag_db --clean-embed=25 --embed-model=Qwen/Qwen3-Embedding-0.6B
     clean = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--clean-embed=')), None)
     embed_model = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--embed-model=')), default_embed_model)
+    # --overviews embeds tmdb overviews from fetch_tmdb.py with each movie
+    overviews = overviews_arg()
     collection, bm25_index, movieIds = create_collection(collection_name, movie_file, tags_file, k, embed_top_tags=clean,
-                                                         embed_model=embed_model)
+                                                         embed_model=embed_model, overviews=overviews)
     with open('bm25/bm25_data.pkl', 'wb') as f:
         pickle.dump(bm25_index, f)
     with open('movie-info/movieIds.pkl', 'wb') as f:

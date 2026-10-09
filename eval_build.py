@@ -1,4 +1,4 @@
-from gen_embeds import create_collection
+from gen_embeds import create_collection, overviews_arg
 from hybrid_search import default_embed_model
 from get_user_profile import movie_file, tags_file
 import numpy as np
@@ -81,7 +81,10 @@ if __name__ == '__main__':
     clean = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--clean-embed=')), None)
     # --embed-model=NAME embeds with another model, e.g. Qwen/Qwen3-Embedding-0.6B, into eval_db_<model>[_cleanN]
     embed_model = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--embed-model=')), default_embed_model)
-    variant = clean or embed_model != default_embed_model
+    # --overviews adds tmdb overviews to the embedded text, into eval_db..._ov, overviews hold no movielens tags so
+    # they can't leak a held out query
+    overviews = overviews_arg()
+    variant = clean or embed_model != default_embed_model or overviews
     if variant:
         # a variant index is scored against the existing queries, so they are checked, not rewritten
         with open(queries_file, 'rb') as f:
@@ -96,9 +99,9 @@ if __name__ == '__main__':
         held_out_tags = tags_file[~tags_file['userId'].isin(test_users)]
         print(f"indexing with {len(held_out_tags)} of {len(tags_file)} tag applications")
         name = (eval_collection + ('' if embed_model == default_embed_model else '_' + embed_model.split('/')[-1].lower())
-                + (f'_clean{clean}' if clean else ''))
+                + (f'_clean{clean}' if clean else '') + ('_ov' if overviews else ''))
         collection, bm25_index, movieIds = create_collection(name, movie_file, held_out_tags, len(movie_file),
-                                                             embed_top_tags=clean, embed_model=embed_model)
+                                                             embed_top_tags=clean, embed_model=embed_model, overviews=overviews)
         if not variant:
             with open(eval_bm25_file, 'wb') as f:
                 pickle.dump(bm25_index, f)
