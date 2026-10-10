@@ -10,7 +10,8 @@ import time
 
 # scores ranking weights against the offline eval set built by eval_build.py
 # shared with the api so the shipped candidate pool is the evaluated one
-depth = candidate_depth
+# --depth=N builds and scores deeper pools, for reranking (eval_rerank.py), in their own cache
+depth = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--depth=')), candidate_depth)
 # blend values the cache holds knn lists for, fixed because the cache layout depends on them
 pref_values = [0.0, 0.3]
 # the defaults before phase 2, sweep and final stay relative to these so their saved results reproduce
@@ -39,10 +40,11 @@ cache_version = 4
 popularity_file = 'movie-info/popularity.pkl'
 shuffle_seed = 1
 
-def cache_path(name, bm25=bm25_arg):
+def cache_path(name, bm25=bm25_arg, depth=depth):
     # caches at phase 2's bm25 parameters keep their original names, they predate the parameter
     params = '' if bm25 == phase2_bm25 else f"_k1{bm25['k1']}_b{bm25['b']}"
-    return f"movie-info/eval_cache_v{cache_version}{'_natural' if natural else ''}{'' if name == 'eval_db' else f'_{name}'}{params}.pkl"
+    pool = '' if depth == candidate_depth else f'_d{depth}'
+    return f"movie-info/eval_cache_v{cache_version}{'_natural' if natural else ''}{'' if name == 'eval_db' else f'_{name}'}{params}{pool}.pkl"
 
 def controls(entries, queries):
     # shuffled: each query gets another same-split user's preferences, global: everyone gets the mean preferences
@@ -63,7 +65,7 @@ def controls(entries, queries):
             genres[g] = genres.get(g, 0.0) + v / len(val)
     return shuffle, mean / np.linalg.norm(mean), genres
 
-def retrieve_all(retrieval, collection, queries):
+def retrieve_all(retrieval, collection, queries, depth=depth):
     # one retrieval pass per query and preference weight, every weight variant re-scores these lists
     entries = []
     start = time.time()
@@ -102,9 +104,9 @@ def retrieve_all(retrieval, collection, queries):
             'entries': entries, 'emb_index': index, 'emb': emb,
             'shuffle': shuffle, 'global_vector': mean, 'global_genres': genres}
 
-def load_cache(name, queries, bm25=bm25_arg):
+def load_cache(name, queries, bm25=bm25_arg, depth=depth):
     # a cache from another format, collection, query set or bm25 parameters is rebuilt instead of silently misread
-    file = cache_path(name, bm25)
+    file = cache_path(name, bm25, depth)
     if os.path.exists(file) and '--refresh' not in sys.argv:
         with open(file, 'rb') as f:
             cache = pickle.load(f)
@@ -115,7 +117,7 @@ def load_cache(name, queries, bm25=bm25_arg):
         print(f"{file} is an old or mismatched cache, rebuilding")
     collection = chromadb.PersistentClient().get_collection(name)
     retrieval = Retrieval(collection, 'bm25/eval_bm25.pkl', 'movie-info/eval_movieIds.pkl', bm25_params=bm25)
-    cache = dict(retrieve_all(retrieval, collection, queries), bm25_params=bm25)
+    cache = dict(retrieve_all(retrieval, collection, queries, depth), bm25_params=bm25)
     with open(file, 'wb') as f:
         pickle.dump(cache, f)
     return cache
