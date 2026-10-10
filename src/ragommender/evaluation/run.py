@@ -43,8 +43,9 @@ references = {
     'bm25_only': dict(default_weights, vector=0.0, popularity=0.0),
     'no_popularity': dict(default_weights, popularity=0.0),
 }
-grid = {'vector': [0.0, 0.125, 0.25, 0.5, 1.0], 'popularity': [0.0, 0.0025, 0.005, 0.01, 0.02, 0.04],
-        'k1': [1.5, 3.0, 5.0], 'b': [0.1, 0.3, 0.75]}
+# the first sweep's best rows sat at popularity 0.02 and k1 5, so the grid has steps around 0.02 and goes past 5
+grid = {'vector': [0.0, 0.125, 0.25, 0.5, 1.0], 'popularity': [0.0, 0.0025, 0.005, 0.01, 0.015, 0.02, 0.03, 0.04],
+        'k1': [1.5, 3.0, 5.0, 8.0], 'b': [0.1, 0.3, 0.75]}
 
 def load_queries():
     with open(paths.labels_file, 'rb') as f:
@@ -177,15 +178,24 @@ if __name__ == '__main__':
                 rows.append({'vector': vector, 'popularity': pop, 'k1': k1, 'b': b,
                              'ndcg@10': float(np.mean([r[i]['ndcg@10'] for i in val])),
                              'diff': [r[i]['ndcg@10'] - shipped[i]['ndcg@10'] for i in val]})
-        rows.sort(key=lambda r: -r['ndcg@10'])
-        for r in rows[:15]:
+        # selection rule (docs/evaluation.md pass bar): the highest val mean among rows whose tail difference against
+        # what ships isn't clearly worse (ci upper bound >= 0)
+        tail = [k for k, i in enumerate(val) if buckets[i] == 'tail']
+        for r in rows:
             r['vs_shipped'] = summarize(r['diff'], rng)
+            r['tail_vs_shipped'] = summarize([r['diff'][k] for k in tail], rng)
+            r['eligible'] = r['tail_vs_shipped']['ci95'][1] >= 0
+        rows.sort(key=lambda r: -r['ndcg@10'])
+        pick = next(r for r in rows if r['eligible'])
         shipped_val = float(np.mean([shipped[i]['ndcg@10'] for i in val]))
-        print(f"shipped val ndcg@10 {shipped_val:.4f}, {len(rows)} rows, best:")
+        print(f"shipped val ndcg@10 {shipped_val:.4f}, {len(rows)} rows, {sum(r['eligible'] for r in rows)} pass the tail check, best:")
         for r in rows[:15]:
-            d = r['vs_shipped']
+            d, t = r['vs_shipped'], r['tail_vs_shipped']
             print(f"  vector {r['vector']:<5} popularity {r['popularity']:<6} k1 {r['k1']:<3} b {r['b']:<4} ndcg@10 "
-                  f"{r['ndcg@10']:.4f}  vs shipped {d['mean']:+.4f} [{d['ci95'][0]:+.4f}, {d['ci95'][1]:+.4f}]")
+                  f"{r['ndcg@10']:.4f}  vs shipped {d['mean']:+.4f} [{d['ci95'][0]:+.4f}, {d['ci95'][1]:+.4f}]  "
+                  f"tail {t['mean']:+.4f} [{t['ci95'][0]:+.4f}, {t['ci95'][1]:+.4f}]{'' if r['eligible'] else '  (fails tail)'}")
+        print(f"pick: vector {pick['vector']}, popularity {pick['popularity']}, k1 {pick['k1']}, b {pick['b']}")
+        results['pick'] = {k: pick[k] for k in ['vector', 'popularity', 'k1', 'b']}
         results.update(split='val', shipped_val=shipped_val, grid=grid,
                        rows=[{k: v for k, v in r.items() if k != 'diff'} for r in rows])
         out = paths.results_dir / f'eval_consensus_sweep{suffix}.json'
@@ -215,7 +225,8 @@ if __name__ == '__main__':
             results['configs'][name] = report(r, None if name == 'shipped' else shipped, queries, buckets, rng)
             for split in ['val', 'test']:
                 show(name, split, results['configs'][name][split])
-        out = paths.results_dir / f'eval_consensus{suffix}.json'
+        # a candidate run is a one time test look, kept apart from the base results
+        out = paths.results_dir / f"eval_consensus{'_candidate' if candidate else ''}{suffix}.json"
     with open(out, 'w') as f:
         json.dump(results, f, indent=1)
     print(f"written to {out}, {time.time()-start:.0f}s")

@@ -2,26 +2,27 @@ import re
 
 # the ranking math shared by the api (hybrid_search, retrieval) and the eval, kept free of model imports
 
-# phase 3 picked vector and popularity on the per-user eval with the qwen3 index and the bm25 parameters below, the
-# consensus eval (evaluation/run.py) ranks configurations the same way. rrf_k and year_boost are hand-picked
+# vector, popularity and the bm25 parameters below were picked on the consensus eval's natural val queries
+# (evaluation/run.py --natural --sweep), natural test +0.0151 [+0.0065, +0.0236] over phase 3's vector 0.25,
+# popularity 0.01, k1 3. rrf_k and year_boost are hand-picked
 default_weights = {
-    # 0 would skip the knn query, minilm's knn lost to keyword only search, qwen3's earns a small weight
-    'vector': 0.25,
+    # 0 would skip the knn query, qwen3's knn earns a small weight
+    'vector': 0.125,
     'bm25': 1.0,
     'rrf_k': 60,
     # added to movies in the era a rewritten query asks for
     'year_boost': 0.005,
     # added per candidate, scaled popularity (0..1)
-    'popularity': 0.01
+    'popularity': 0.02
 }
 
 # candidates fetched per list, popularity and the era boost re-sort the whole pool so it must match the eval's
 candidate_depth = 100
 
-# bm25 k1 and b, tuned in phase 3 on the per-user eval (eval_bm25.py, removed after 698c0e9). rank_bm25's defaults,
-# which the pickles are built with, are 1.5 and 0.75. a low b barely normalizes length, and indexed text grows with
-# tag count, so it leans towards popular movies
-bm25_params = {'k1': 3.0, 'b': 0.1}
+# bm25 k1 and b, picked with the weights above (k1 3 and 5 tie on val). rank_bm25's defaults, which the pickles are
+# built with, are 1.5 and 0.75. a low b barely normalizes length, and indexed text grows with tag count, so it leans
+# towards popular movies
+bm25_params = {'k1': 5.0, 'b': 0.1}
 
 def parse_year(title):
     match = re.search(r'\((\d{4})\)\s*$', title)
