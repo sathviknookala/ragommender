@@ -1,6 +1,7 @@
 from hybrid_search import Retrieval, default_weights, candidate_depth
-from preferences import record_swipe, get_latest_swipes, get_user_preferences, apply_boosts, genres_by_id
+from preferences import record_swipe, get_latest_swipes, get_user_preferences, apply_boosts
 from survey import get_survey_movies
+from rewrite import rewrite_query
 import chromadb
 import llm
 import os
@@ -12,17 +13,11 @@ collection = client.get_collection(cName)
 retrieval = Retrieval(collection, 'bm25/bm25_data.pkl', 'movie-info/movieIds.pkl', 'movie-info/popularity.pkl')
 
 explain_top = 5
-all_genres = sorted({g for genres in genres_by_id.values() for g in genres} - {'(no genres listed)'})
 
 explain_system = ("You explain movie recommendations. For each candidate write one sentence of at most 20 words. "
                   "When the candidate relates to a movie the user liked, name that movie and say what they share. "
                   "Otherwise point to the candidate's own genres, themes or setting. Never restate the search or say "
                   "it fits the search or the user's preference. Reply as json {item_id: reason}.")
-rewrite_system = ("Rewrite a movie search into json {keywords, genres, year_from, year_to}. keywords are only "
-                  "distinctive search terms: titles, themes, settings, people. Drop filler and comparative words such "
-                  "as movie, film, something, like, funnier, better, and never put eras or years in keywords. Put an "
-                  "era into year_from and year_to (90s is 1990 to 1999), otherwise use null for both. genres must "
-                  "come from the allowed list.")
 summary_system = "Summarize a viewer's movie taste in two sentences from the movies they liked and disliked."
 
 def get_learned_weights(swipe_count: int):
@@ -37,23 +32,6 @@ def get_learned_weights(swipe_count: int):
 def swiped_titles(user_id: str, direction: str, n: int = 10):
     swipes = [s for s in get_latest_swipes(user_id) if s['direction'] == direction][-n:]
     return [retrieval.movieIds.get(int(s['item_id']), s['item_id']) for s in swipes]
-
-def rewrite_query(query: str):
-    schema = {
-        'type': 'object',
-        'properties': {
-            'keywords': {'type': 'array', 'items': {'type': 'string'}, 'maxItems': 8},
-            'genres': {'type': 'array', 'items': {'type': 'string', 'enum': all_genres}, 'maxItems': 3},
-            'year_from': {'type': ['integer', 'null']},
-            'year_to': {'type': ['integer', 'null']}
-        },
-        'required': ['keywords', 'genres', 'year_from', 'year_to']
-    }
-    messages = [{'role': 'system', 'content': f"{rewrite_system} Allowed genres: {', '.join(all_genres)}."},
-                {'role': 'user', 'content': query}]
-    # rewrites don't depend on the user so they share one cache entry per query
-    return llm.cached(llm.make_key('rewrite', query.lower()),
-                      lambda: llm.chat(messages, max_tokens=100, schema=schema, temperature=0.3))
 
 def explain_items(user_id: str, query: str, items: list):
     ids = [item['item_id'] for item in items]
@@ -95,7 +73,6 @@ def search(user_id: str, query: str, k: int = 20, explain: bool = False, rewrite
             rewritten = None
         llm_calls.append((rewritten is not None, was_cached))
     bm25_text = f"{query} {' '.join(rewritten['keywords'])}" if rewritten else None
-    query_genres = set(rewritten['genres']) if rewritten else set()
     years = sorted(y for y in [rewritten.get('year_from'), rewritten.get('year_to')] if isinstance(y, int)) if rewritten else []
     year_range = (years[0], years[-1]) if years else None
 
@@ -109,7 +86,8 @@ def search(user_id: str, query: str, k: int = 20, explain: bool = False, rewrite
         extra = retrieval.hybrid_search(query, pool, preference_vector=vector, weights=weights, bm25_text=bm25_text)
         results += [item for item in extra if item['item_id'] not in seen]
 
-    results = apply_boosts(results, prefs['genre_preferences'], weights, query_genres, year_range)[:k]
+    # the rewrite's genres aren't boosted: on the eval the boost cost natural queries about 0.005 (eval_rewrite.py)
+    results = apply_boosts(results, prefs['genre_preferences'], weights, year_range=year_range)[:k]
     for item in results:
         reason = []
         if item['vector_rank']:

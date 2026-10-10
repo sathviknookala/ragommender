@@ -141,7 +141,9 @@ def rank(cache, i, weights, popularity=None, mode='own'):
         sims = dict(zip(ids, cache['emb'][[cache['emb_index'][m] for m in ids]] @ vector))
     # same fallback as the api, knn fills in when bm25 matched nothing
     items = fuse(knn, c['bm25'], with_fallback(weights, c['bm25']), popularity, sims)
-    return [item['item_id'] for item in apply_boosts(items, genre_preferences if weights['genre_boost'] else {}, weights)]
+    # genres and an era from the llm rewrite, only set by eval_rewrite.py, as retrieval.search boosts them
+    return [item['item_id'] for item in apply_boosts(items, genre_preferences if weights['genre_boost'] else {}, weights,
+                                                     c.get('query_genres', ()), c.get('year_range'))]
 
 def metrics(ranked, relevant):
     relevant = set(relevant)
