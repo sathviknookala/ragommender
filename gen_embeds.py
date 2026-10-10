@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
 from hybrid_search import default_embed_model
-from get_user_profile import movie_file, tags_file
+from catalog import movie_file, tags_file
 from fetch_tmdb import load_overviews, tmdb_file
 import chromadb
 import pandas as pd

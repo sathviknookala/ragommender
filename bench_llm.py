@@ -10,11 +10,8 @@ import time
 tags = 'space alien sci-fi dark atmospheric suspense survival crew ship horror classic cult'
 candidates = '\n'.join(f"{i}. Movie {i} ({1980+i}) Sci-Fi|Horror|Thriller {' '.join([tags]*6)}" for i in range(1, 6))
 tasks = {
-    'explain': ('You explain movie recommendations in one sentence each. Reply as json {item_id: reason}.',
-                f"User likes: Alien, Event Horizon, The Thing. Query: scary space movies\nCandidates:\n{candidates}", 220),
-    'summary': ('You summarize a viewer\'s movie taste in two sentences.',
-                'Liked: ' + ', '.join(f"Movie {i} (Sci-Fi|Action)" for i in range(25)) + '\nDisliked: ' +
-                ', '.join(f"Movie {i} (Romance|Drama)" for i in range(10)), 100),
+    'explain': ('You explain movie search results in one sentence each. Reply as json {item_id: reason}.',
+                f"Search: scary space movies\nCandidates:\n{candidates}", 220),
     'rewrite': ('Rewrite a movie search into json {keywords: [...], genres: [...]}.',
                 'something like alien but funnier, preferably from the 90s', 80),
 }
@@ -67,9 +64,9 @@ def bench(task, level, rounds=2):
           f"total={sum(r['tokens'] for r in results)/wall:7.1f} tok/s")
 
 if __name__ == '__main__':
-    # python bench_llm.py [levels] [tasks], e.g. python bench_llm.py 1,2,4,8,12 explain,summary
+    # python bench_llm.py [levels] [tasks], e.g. python bench_llm.py 1,2,4,8,12 explain,rewrite
     levels = [int(x) for x in (sys.argv[1] if len(sys.argv) > 1 else '1,2,4,8,12').split(',')]
-    names = (sys.argv[2] if len(sys.argv) > 2 else 'explain,summary,rewrite').split(',')
+    names = (sys.argv[2] if len(sys.argv) > 2 else 'explain,rewrite').split(',')
     print(f"server: {llm.base_url} model: {llm.get_model()}")
     for task in names:
         run_one(httpx.Client(base_url=llm.base_url, timeout=120), task, -1)  # warmup

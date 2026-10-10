@@ -12,7 +12,6 @@ base_url = os.environ.get('LLM_BASE_URL', 'http://127.0.0.1:8001/v1')
 model = os.environ.get('LLM_MODEL', '')
 # must match the server's --max-num-seqs
 max_concurrency = int(os.environ.get('LLM_MAX_CONCURRENCY', 8))
-background_slots = int(os.environ.get('LLM_BACKGROUND_SLOTS', 2))
 # explain calls hold a slot ~4s at 8 concurrent, so wait about that long before falling back
 queue_timeout = float(os.environ.get('LLM_QUEUE_TIMEOUT', 4))
 llm_timeout = float(os.environ.get('LLM_TIMEOUT', 20))
@@ -25,7 +24,6 @@ client = httpx.Client(
     limits=httpx.Limits(max_connections=max_concurrency, max_keepalive_connections=max_concurrency)
 )
 slots = threading.BoundedSemaphore(max_concurrency)
-bg_slots = threading.BoundedSemaphore(background_slots)
 model_lock = threading.Lock()
 cache_lock = threading.Lock()
 cache = OrderedDict()
@@ -52,37 +50,32 @@ def mark_down():
 def is_up():
     return enabled and time.time() >= down_until
 
-def chat(messages, max_tokens=200, schema=None, temperature=0.7, background=False):
+def chat(messages, max_tokens=200, schema=None, temperature=0.7):
     '''
     Returns the reply text, the parsed json when a schema is given, or None on any failure
     '''
     if not is_up():
         return None
-    if background and not bg_slots.acquire(timeout=queue_timeout):
+    if not slots.acquire(timeout=queue_timeout):
         return None
     try:
-        if not slots.acquire(timeout=queue_timeout):
-            return None
-        try:
-            body = {
-                'model': get_model(),
-                'messages': messages,
-                'max_tokens': max_tokens,
-                'temperature': temperature,
-                'top_p': 0.8,
-                'top_k': 20,
-                'chat_template_kwargs': {'enable_thinking': False}
-            }
-            if schema:
-                body['response_format'] = {'type': 'json_schema',
-                                           'json_schema': {'name': 'response', 'schema': schema}}
-            resp = client.post('/chat/completions', json=body)
-            resp.raise_for_status()
-            content = resp.json()['choices'][0]['message']['content'] or ''
-            content = think_re.sub('', content).strip()
-            return json.loads(content) if schema else content
-        finally:
-            slots.release()
+        body = {
+            'model': get_model(),
+            'messages': messages,
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+            'top_p': 0.8,
+            'top_k': 20,
+            'chat_template_kwargs': {'enable_thinking': False}
+        }
+        if schema:
+            body['response_format'] = {'type': 'json_schema',
+                                       'json_schema': {'name': 'response', 'schema': schema}}
+        resp = client.post('/chat/completions', json=body)
+        resp.raise_for_status()
+        content = resp.json()['choices'][0]['message']['content'] or ''
+        content = think_re.sub('', content).strip()
+        return json.loads(content) if schema else content
     except httpx.HTTPStatusError as e:
         # 5xx means the server is unhealthy, 4xx only affects this request
         if e.response.status_code >= 500:
@@ -94,8 +87,7 @@ def chat(messages, max_tokens=200, schema=None, temperature=0.7, background=Fals
     except (json.JSONDecodeError, KeyError, IndexError):
         return None
     finally:
-        if background:
-            bg_slots.release()
+        slots.release()
 
 def make_key(*parts):
     return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()

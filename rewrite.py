@@ -1,7 +1,7 @@
-from preferences import genres_by_id
+from catalog import genres_by_id
 import llm
 
-# the llm query rewrite, shared by the api (retrieval.search) and its eval (eval_rewrite.py)
+# the llm query rewrite, shared by the api (retrieval.search) and the eval (eval.py --natural)
 all_genres = sorted({g for genres in genres_by_id.values() for g in genres} - {'(no genres listed)'})
 
 rewrite_system = ("Rewrite a movie search into json {keywords, genres, year_from, year_to}. keywords are only "

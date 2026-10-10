@@ -1,4 +1,4 @@
-from eval_build import pick_test_users, read_ratings, seed, queries_file
+from eval_build import pick_test_users, read_ratings, seed, test_users_n
 import numpy as np
 import pickle
 
@@ -13,14 +13,10 @@ def scaled(counts):
 if __name__ == '__main__':
     ratings = read_ratings()
     _, test_users = pick_test_users(np.random.default_rng(seed), ratings)
-    # the reproduced set must contain every user that has an eval query
-    with open(queries_file, 'rb') as f:
-        query_users = {q['user'] for q in pickle.load(f)['queries']}
-    assert query_users <= test_users, 'reproduced held out users do not match eval_queries.pkl'
+    assert len(test_users) == test_users_n, f'expected {test_users_n} held out users, got {len(test_users)}'
     counts_all = ratings.groupby('movieId').size()
     counts_eval = ratings[~ratings['userId'].isin(test_users)].groupby('movieId').size()
     with open(popularity_file, 'wb') as f:
         pickle.dump({'all': scaled(counts_all), 'eval': scaled(counts_eval),
                      'count_eval': {int(m): int(n) for m, n in counts_eval.items()}}, f)
-    print(f"{len(test_users)} held out users ({len(query_users)} with queries), "
-          f"{len(counts_all)} movies counted, {len(counts_eval)} after exclusion")
+    print(f"{len(test_users)} held out users, {len(counts_all)} movies counted, {len(counts_eval)} after exclusion")

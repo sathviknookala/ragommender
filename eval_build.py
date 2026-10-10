@@ -1,21 +1,26 @@
 from gen_embeds import create_collection, overviews_arg
 from hybrid_search import default_embed_model
-from get_user_profile import movie_file, tags_file
+from catalog import movie_file, tags_file
+import hashlib
 import numpy as np
 import pandas as pd
 import pickle
 import sys
 import time
 
-# builds the offline eval set: movielens tag applications become (user, query, relevant movies) triples
+# builds the offline eval set: a label set where each query is a movielens tag and its relevant movies are the ones
+# several held out users applied it to, and an eval index without those users' tags
+# a movie is relevant to a tag when at least min_users held out users applied it, keeping tags with min_relevant such
+# movies. the index only holds other users' tags (the crowd signal production has too), so a label never matches its
+# own tag application. queries are per tag, not per user, the service matches queries and has no user state
 seed = 17
 test_users_n = 1500
-queries_per_user = 2
 # only tags many users share, so queries look like a vocabulary people search with
 min_tag_users = 20
-max_relevant = 20
 min_ratings = 20
-queries_file = 'movie-info/eval_queries.pkl'
+min_users = 2
+min_relevant = 5
+labels_file = 'movie-info/eval_consensus.pkl'
 eval_collection = 'eval_db'
 eval_bm25_file = 'bm25/eval_bm25.pkl'
 eval_movieIds_file = 'movie-info/eval_movieIds.pkl'
@@ -35,48 +40,24 @@ def pick_test_users(rng, ratings):
 def read_ratings():
     return pd.read_csv('movie-info/ratings.csv', dtype={'userId': 'int32', 'movieId': 'int32', 'rating': 'float32', 'timestamp': 'int64'})
 
-def build_queries(rng):
-    ratings = read_ratings()
-    tags, test_users = pick_test_users(rng, ratings)
-
-    pairs = (tags[tags['userId'].isin(test_users)]
-             .groupby(['userId', 'query'])
-             .agg(movies=('movieId', lambda m: sorted(set(m))), time=('timestamp', 'min'))
-             .reset_index())
-    pairs = pairs[pairs['movies'].map(len) <= max_relevant]
-    ratings = ratings[ratings['userId'].isin(test_users)].sort_values('timestamp')
-    ratings_by_user = dict(tuple(ratings.groupby('userId')))
-
+def build_labels(rng):
+    tags, test_users = pick_test_users(rng, read_ratings())
+    held = tags[tags['userId'].isin(test_users)]
+    users = held.groupby(['query', 'movieId'])['userId'].nunique()
+    agreed = users[users >= min_users].reset_index()
     queries = []
-    for user, group in pairs.groupby('userId'):
-        picked = group.sample(n=min(queries_per_user, len(group)), random_state=int(rng.integers(1 << 30)))
-        history_all = ratings_by_user.get(user)
-        for row in picked.itertuples():
-            relevant = set(row.movies)
-            # only ratings made before the tag, and never the movies being searched for
-            history = history_all[(history_all['timestamp'] < row.time) & ~history_all['movieId'].isin(relevant)]
-            likes = history[history['rating'] >= 4]['movieId'].tolist()[-50:]
-            dislikes = history[history['rating'] <= 2]['movieId'].tolist()[-50:]
-            swipes = ([{'item_id': str(m), 'direction': 'like'} for m in likes] +
-                      [{'item_id': str(m), 'direction': 'dislike'} for m in dislikes])
-            queries.append({
-                'user': int(user),
-                'query': row.query,
-                'relevant': [str(m) for m in row.movies],
-                'time': int(row.time),
-                'swipes': swipes,
-                'n_history': int(((history['rating'] >= 4) | (history['rating'] <= 2)).sum()),
-                # split by user so validation and test never share a person
-                'split': 'val' if user % 2 == 0 else 'test'
-            })
+    for tag, group in agreed.groupby('query'):
+        if len(group) >= min_relevant:
+            # split by tag, so val and test never share a query
+            split = 'val' if int(hashlib.sha1(tag.encode()).hexdigest(), 16) % 2 == 0 else 'test'
+            queries.append({'tag': tag, 'relevant': [str(m) for m in group['movieId']],
+                            'users': {str(m): int(n) for m, n in zip(group['movieId'], group['userId'])}, 'split': split})
     return queries, test_users
 
 if __name__ == '__main__':
     start = time.time()
-    rng = np.random.default_rng(seed)
-    queries, test_users = build_queries(rng)
-    config = {'seed': seed, 'test_users': len(test_users), 'min_tag_users': min_tag_users,
-              'max_relevant': max_relevant, 'min_ratings': min_ratings, 'queries_per_user': queries_per_user}
+    queries, test_users = build_labels(np.random.default_rng(seed))
+    config = {'min_users': min_users, 'min_relevant': min_relevant, 'seed': seed, 'held_out_users': len(test_users)}
     # --clean-embed=N builds eval_db_cleanN, embedding only the top N tags, bm25 is unchanged so its pickle is reused
     clean = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--clean-embed=')), None)
     # --embed-model=NAME embeds with another model, e.g. Qwen/Qwen3-Embedding-0.6B, into eval_db_<model>[_cleanN]
@@ -86,16 +67,18 @@ if __name__ == '__main__':
     overviews = overviews_arg()
     variant = clean or embed_model != default_embed_model or overviews
     if variant:
-        # a variant index is scored against the existing queries, so they are checked, not rewritten
-        with open(queries_file, 'rb') as f:
-            assert pickle.load(f)['queries'] == queries, f'rebuilt queries differ from {queries_file}'
+        # a variant index is scored against the existing labels, so they are checked, not rewritten
+        with open(labels_file, 'rb') as f:
+            assert pickle.load(f)['queries'] == queries, f'rebuilt labels differ from {labels_file}'
     else:
-        with open(queries_file, 'wb') as f:
+        with open(labels_file, 'wb') as f:
             pickle.dump({'config': config, 'queries': queries}, f)
-    print(f"{len(queries)} queries from {len(test_users)} test users, {time.time()-start:.0f}s")
+    n = [len(q['relevant']) for q in queries]
+    print(f"{len(queries)} tag queries ({sum(q['split'] == 'val' for q in queries)} val) from {len(test_users)} held out "
+          f"users, relevant per query median {int(np.median(n))}, max {max(n)}, {time.time()-start:.0f}s")
 
-    if '--queries-only' not in sys.argv:
-        # the eval index leaves out every tag the test users wrote, so a query can't match its own tag
+    if '--labels-only' not in sys.argv:
+        # the eval index leaves out every tag the held out users wrote, so a query can't match its own tag
         held_out_tags = tags_file[~tags_file['userId'].isin(test_users)]
         print(f"indexing with {len(held_out_tags)} of {len(tags_file)} tag applications")
         name = (eval_collection + ('' if embed_model == default_embed_model else '_' + embed_model.split('/')[-1].lower())
