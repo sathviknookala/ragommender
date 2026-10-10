@@ -1,15 +1,23 @@
-from hybrid_search import Retrieval, default_weights, candidate_depth, default_embed_model, boost_era
-from rewrite import rewrite_query
+from functools import cache
+from ragommender.hybrid_search import Retrieval, default_embed_model
+from ragommender.ranking import default_weights, candidate_depth, boost_era
+from ragommender.rewrite import rewrite_query
+from ragommender import llm, paths
 import chromadb
-import llm
 import os
 
-cName = os.environ.get('CHROMA_COLLECTION', 'rag_db')
-client = chromadb.PersistentClient()
-collection = client.get_collection(cName)
-retrieval = Retrieval(collection, 'bm25/bm25_data.pkl', 'movie-info/movieIds.pkl', 'movie-info/popularity.pkl')
-# the index and embedding model results come from, returned with every search
-model_version = f"{cName}/{(collection.metadata or {}).get('embed_model', default_embed_model)}"
+@cache
+def index():
+    # the shipped index, loaded on first use (the api warms it at startup) so importing this module is cheap
+    name = os.environ.get('CHROMA_COLLECTION', 'rag_db')
+    collection = chromadb.PersistentClient(path=str(paths.chroma_dir)).get_collection(name)
+    retrieval = Retrieval(collection, paths.bm25_file, paths.movieIds_file, paths.popularity_file)
+    return collection, retrieval
+
+def model_version():
+    # the index and embedding model results come from, returned with every search
+    collection, _ = index()
+    return f"{collection.name}/{(collection.metadata or {}).get('embed_model', default_embed_model)}"
 
 explain_top = 5
 
@@ -19,7 +27,7 @@ explain_system = ("You explain movie search results. For each candidate write on
 
 def explain_items(query: str, items: list):
     ids = [item['item_id'] for item in items]
-    docs = collection.get(ids=ids, include=['documents'])
+    docs = index()[0].get(ids=ids, include=['documents'])
     descriptions = dict(zip(docs['ids'], docs['documents']))
     candidates = '\n'.join(f"{i}: {descriptions.get(i, '')[:300]}" for i in ids)
     schema = {'type': 'object', 'properties': {i: {'type': 'string'} for i in ids}, 'required': ids}
@@ -31,6 +39,7 @@ def explain_items(query: str, items: list):
                       lambda: llm.chat(messages, max_tokens=320, schema=schema, temperature=0.3))
 
 def search(query: str, k: int = 20, explain: bool = False, rewrite: bool = False):
+    _, retrieval = index()
     weights = default_weights
     llm_calls = []
 
@@ -53,7 +62,7 @@ def search(query: str, k: int = 20, explain: bool = False, rewrite: bool = False
         extra = retrieval.hybrid_search(query, pool, weights=weights, bm25_text=bm25_text)
         results += [item for item in extra if item['item_id'] not in seen]
 
-    # the rewrite's genres aren't boosted: on the eval the boost cost natural queries about 0.005 (eval_rewrite.py, 7c7c2b7)
+    # the rewrite's genres aren't boosted: on the eval the boost cost natural queries about 0.005 (eval_rewrite.py in 7c7c2b7)
     results = boost_era(results, weights, year_range)[:k]
     for item in results:
         reason = []
@@ -86,6 +95,3 @@ def search(query: str, k: int = 20, explain: bool = False, rewrite: bool = False
         'llm_used': any(used for used, _ in llm_calls),
         'llm_cached': bool(llm_calls) and all(used and cached for used, cached in llm_calls)
     }
-
-if __name__ == '__main__':
-    print(search('space adventure', 3))

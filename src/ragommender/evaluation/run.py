@@ -1,26 +1,23 @@
-from eval_build import labels_file
-from eval_paraphrase import natural_file
-from build_popularity import popularity_file
-from hybrid_search import Retrieval, default_weights, fuse, with_fallback, boost_era, parse_year, candidate_depth, bm25_params
-from rewrite import rewrite_query, rewrite_system
+from ragommender.ranking import default_weights, fuse, with_fallback, boost_era, parse_year, candidate_depth, bm25_params
+from ragommender.rewrite import rewrite_query, rewrite_system
+from ragommender import llm, paths
 from concurrent.futures import ThreadPoolExecutor
 import chromadb
 import hashlib
 import itertools
 import json
-import llm
 import numpy as np
 import os
 import pickle
 import sys
 import time
 
-# the main offline eval. each query is a movielens tag from the consensus label set (eval_build.py), its relevant
+# the main offline eval. each query is a movielens tag from the consensus label set (evaluation/build.py), its relevant
 # movies are the ones at least 2 held out users gave that tag, and it is ranked the way retrieval.search ranks it:
 # bm25 and knn fused by weighted rrf, plus popularity and, for a rewritten query, the era filter and boost.
 # scores are NDCG@10, precision@10 and recall@10 with bootstrap CIs, paired against what ships, per split.
 # val and test are split by tag: pick on val, score test once
-#   --natural            swaps each tag for its llm paraphrase (eval_paraphrase.py) and scores the llm rewrite too,
+#   --natural            swaps each tag for its llm paraphrase (evaluation/paraphrase.py) and scores the llm rewrite too,
 #                        --rewrite fills rewrites the saved file is missing through the local llm
 #   --sweep              grids vector, popularity and bm25 k1/b on val only, test isn't scored
 #   --weights=K=V,...    scores those weights (vector, popularity, k1, b) as 'candidate' against what ships
@@ -39,7 +36,7 @@ suffix = ('_natural' if natural else '') + ('' if collection_name == shipped_col
 bootstrap_n = 1000
 metric_names = ['ndcg@10', 'precision@10', 'recall@10']
 # saved rewrites of the natural queries, keyed by the rewrite prompt so a prompt change gets fresh ones
-rewrites_file = f"movie-info/eval_rewrites_natural_{hashlib.sha1(rewrite_system.encode()).hexdigest()[:8]}.pkl"
+rewrites_file = paths.movie_info / f"eval_rewrites_natural_{hashlib.sha1(rewrite_system.encode()).hexdigest()[:8]}.pkl"
 # fixed references beside what ships, the old hybrid is stated in absolute values so it can't drift with the defaults
 references = {
     'old_hybrid': dict(default_weights, vector=1.0, popularity=0.0),
@@ -50,15 +47,15 @@ grid = {'vector': [0.0, 0.125, 0.25, 0.5, 1.0], 'popularity': [0.0, 0.0025, 0.00
         'k1': [1.5, 3.0, 5.0], 'b': [0.1, 0.3, 0.75]}
 
 def load_queries():
-    with open(labels_file, 'rb') as f:
+    with open(paths.labels_file, 'rb') as f:
         queries = pickle.load(f)['queries']
     if not natural:
         return [dict(q, query=q['tag']) for q in queries]
-    with open(natural_file, 'rb') as f:
+    with open(paths.natural_file, 'rb') as f:
         paraphrases = pickle.load(f)
     missing = sum(q['tag'] not in paraphrases for q in queries)
     if missing:
-        print(f"{missing} tags have no paraphrase and are left out, run eval_paraphrase.py")
+        print(f"{missing} tags have no paraphrase and are left out, run ragommender.evaluation.paraphrase")
     return [dict(q, query=paraphrases[q['tag']]) for q in queries if q['tag'] in paraphrases]
 
 def load_rewrites(queries):
@@ -144,14 +141,16 @@ def show(name, split, entry):
           f"r@10 {entry['recall@10']['mean']:.3f}{vs}", flush=True)
 
 if __name__ == '__main__':
+    # model imports stay here, so tests can import the ranking and metrics without loading torch
+    from ragommender.hybrid_search import Retrieval
     start = time.time()
     queries = load_queries()
-    with open(popularity_file, 'rb') as f:
+    with open(paths.popularity_file, 'rb') as f:
         pop_data = pickle.load(f)
     popularity = pop_data['eval']
     buckets = popularity_buckets(queries, pop_data['count_eval'])
-    collection = chromadb.PersistentClient().get_collection(collection_name)
-    retrieval = Retrieval(collection, 'bm25/eval_bm25.pkl', 'movie-info/eval_movieIds.pkl')
+    collection = chromadb.PersistentClient(path=str(paths.chroma_dir)).get_collection(collection_name)
+    retrieval = Retrieval(collection, paths.eval_bm25_file, paths.eval_movieIds_file)
     rng = np.random.default_rng(0)
     print(f"{len(queries)} {'natural' if natural else 'tag'} queries on {collection_name}, relevant per query median "
           f"{int(np.median([len(q['relevant']) for q in queries]))}")
@@ -189,7 +188,7 @@ if __name__ == '__main__':
                   f"{r['ndcg@10']:.4f}  vs shipped {d['mean']:+.4f} [{d['ci95'][0]:+.4f}, {d['ci95'][1]:+.4f}]")
         results.update(split='val', shipped_val=shipped_val, grid=grid,
                        rows=[{k: v for k, v in r.items() if k != 'diff'} for r in rows])
-        out = f'results/eval_consensus_sweep{suffix}.json'
+        out = paths.results_dir / f'eval_consensus_sweep{suffix}.json'
     else:
         rows = {'shipped': shipped}
         rows.update({name: score(knn, bm25, queries, w, popularity, every) for name, w in references.items()})
@@ -204,7 +203,7 @@ if __name__ == '__main__':
             if rewrites:
                 rows['shipped_rewrite'] = score(knn, bm25_lists(retrieval, queries, bm25_params, rewrites), queries,
                                                 default_weights, popularity, every)
-                results['rewrite'] = {'file': rewrites_file, 'without_rewrite': sum(q['query'] not in rewrites for q in queries)}
+                results['rewrite'] = {'file': str(rewrites_file.relative_to(paths.root)), 'without_rewrite': sum(q['query'] not in rewrites for q in queries)}
         # popularity alone over the shipped candidate pool, and a perfect reorder of that pool
         pools = [list({m for m, _, _ in k} | {m for m, _, _ in b}) for k, (b, _) in zip(knn, bm25)]
         rows['popularity_only'] = {i: metrics([str(m) for m in sorted(p, key=lambda m: -popularity.get(m, 0.0))], q['relevant'])
@@ -216,7 +215,7 @@ if __name__ == '__main__':
             results['configs'][name] = report(r, None if name == 'shipped' else shipped, queries, buckets, rng)
             for split in ['val', 'test']:
                 show(name, split, results['configs'][name][split])
-        out = f'results/eval_consensus{suffix}.json'
+        out = paths.results_dir / f'eval_consensus{suffix}.json'
     with open(out, 'w') as f:
         json.dump(results, f, indent=1)
     print(f"written to {out}, {time.time()-start:.0f}s")

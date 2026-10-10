@@ -1,11 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
-import llm
+from ragommender.paths import labels_file, natural_file
+from ragommender import llm
 import os
 import pickle
 import time
 
-# rewrites eval tag queries into the kind of search a person types, the eval's natural queries (eval.py --natural)
-natural_file = 'movie-info/eval_natural.pkl'
+# rewrites eval tag queries into the kind of search a person types, the eval's natural queries (evaluation/run.py --natural)
 system = ("Turn a movie tag into a natural search a person might type into a movie app, 3 to 10 words. "
           "Keep the tag's meaning, don't add titles, names or details that aren't in the tag, and avoid copying "
           "the tag word for word when a natural phrasing differs. Reply with only the search.")
@@ -19,7 +19,7 @@ def paraphrase(tag):
     return None
 
 if __name__ == '__main__':
-    with open('movie-info/eval_consensus.pkl', 'rb') as f:
+    with open(labels_file, 'rb') as f:
         queries = pickle.load(f)['queries']
     natural = {}
     if os.path.exists(natural_file):

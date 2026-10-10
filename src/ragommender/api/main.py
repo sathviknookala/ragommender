@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from models import SearchRequest, RecommendationItem
-import llm
-import retrieval
+from ragommender.api.models import SearchRequest, RecommendationItem
+from ragommender import llm, retrieval
 
 @asynccontextmanager
 async def lifespan(app):
+    # load the index and embedding model before the first request
+    retrieval.index()
     yield
     llm.close()
 
@@ -20,7 +21,7 @@ def search(req: SearchRequest):
                                 reason=item['reason'], explain=item.get('explain')) for item in result['items']]
     return {
         'items': items,
-        'model_version': retrieval.model_version,
+        'model_version': retrieval.model_version(),
         'rewritten_query': result['rewritten_query'],
         'llm_used': result['llm_used'],
         'llm_cached': result['llm_cached']

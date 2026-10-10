@@ -1,3 +1,4 @@
+from ragommender.paths import tmdb_file, movie_info
 import asyncio
 import httpx
 import json
@@ -9,8 +10,7 @@ import time
 # fetches each movie's tmdb overview, tagline and keywords through movielens' links.csv, one movie per line
 # resumable: movies already in the file are skipped, failed requests aren't written so a rerun retries them
 # needs TMDB_API_KEY, a v3 api key or a v4 read access token from themoviedb.org/settings/api
-tmdb_file = 'movie-info/tmdb.jsonl'
-links_file = 'movie-info/links.csv'
+links_file = movie_info / 'links.csv'
 api = 'https://api.themoviedb.org/3'
 # tmdb allows around 50 requests a second per ip, 429s are retried after Retry-After
 concurrency = 20

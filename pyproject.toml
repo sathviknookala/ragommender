@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragommender"
+version = "0.1.0"
+description = "Movie search over MovieLens: BM25 and embedding retrieval fused with a popularity prior, plus optional LLM rewrite and explanations"
+requires-python = ">=3.10"
+# the versions this was built and evaluated with
+dependencies = [
+    "chromadb==1.0.21",
+    "fastapi>=0.128",
+    "httpx>=0.28",
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "pydantic>=2.12",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=5.0",
+    "spacy>=3.8",
+    "torch>=2.9",
+    "transformers>=4.57",
+    "uvicorn>=0.35",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# integration tests need the built indexes and the gpu: pytest -m integration
+markers = ["integration: needs the built chroma and bm25 indexes"]
+addopts = "-m 'not integration'"

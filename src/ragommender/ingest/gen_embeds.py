@@ -1,8 +1,9 @@
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
-from hybrid_search import default_embed_model
-from catalog import movie_file, tags_file
-from fetch_tmdb import load_overviews, tmdb_file
+from ragommender.hybrid_search import default_embed_model
+from ragommender.catalog import movies, tags
+from ragommender.ingest.fetch_tmdb import load_overviews
+from ragommender import paths
 import chromadb
 import pandas as pd
 import spacy
@@ -84,7 +85,7 @@ def create_collection(collection_name: str, movie_df: pd.DataFrame, tags_df: pd.
         convert_to_tensor=True
         ).tolist()
 
-    client = chromadb.PersistentClient()
+    client = chromadb.PersistentClient(path=str(paths.chroma_dir))
     try:
         client.delete_collection(name=collection_name)
     except:
@@ -132,25 +133,26 @@ def overviews_arg():
     if '--overviews' not in sys.argv:
         return None
     overviews = load_overviews()
-    assert overviews, f'no overviews in {tmdb_file}, run fetch_tmdb.py first'
-    print(f"{len(overviews)} of {len(movie_file)} movies have a tmdb overview")
+    assert overviews, f'no overviews in {paths.tmdb_file}, run ingest.fetch_tmdb first'
+    print(f"{len(overviews)} of {len(movies())} movies have a tmdb overview")
     return overviews
 
 if __name__ == '__main__':
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     collection_name = args[0]
     # optional second arg limits the number of movies, defaults to the whole catalog
-    k = int(args[1]) if len(args) > 1 else len(movie_file)
-    # the shipped index (phase 3): python gen_embeds.py rag_db --clean-embed=25 --embed-model=Qwen/Qwen3-Embedding-0.6B
+    k = int(args[1]) if len(args) > 1 else len(movies())
+    # the shipped index (phase 3):
+    # python -m ragommender.ingest.gen_embeds rag_db --clean-embed=25 --embed-model=Qwen/Qwen3-Embedding-0.6B
     clean = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--clean-embed=')), None)
     embed_model = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--embed-model=')), default_embed_model)
-    # --overviews embeds tmdb overviews from fetch_tmdb.py with each movie
+    # --overviews embeds tmdb overviews from ingest.fetch_tmdb with each movie
     overviews = overviews_arg()
-    collection, bm25_index, movieIds = create_collection(collection_name, movie_file, tags_file, k, embed_top_tags=clean,
+    collection, bm25_index, movieIds = create_collection(collection_name, movies(), tags(), k, embed_top_tags=clean,
                                                          embed_model=embed_model, overviews=overviews)
-    with open('bm25/bm25_data.pkl', 'wb') as f:
+    with open(paths.bm25_file, 'wb') as f:
         pickle.dump(bm25_index, f)
-    with open('movie-info/movieIds.pkl', 'wb') as f:
+    with open(paths.movieIds_file, 'wb') as f:
         pickle.dump(movieIds, f)        
 
     end_time = time.time()

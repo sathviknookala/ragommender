@@ -8,3 +8,5 @@ movie-info/checksums.txt
 movie-info/*.tmp
 aws-rag-movie-recommender-mvp-playbook.md
 movie-info/*.jsonl
+*.egg-info/
+.pytest_cache/

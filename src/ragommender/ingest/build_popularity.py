@@ -1,10 +1,11 @@
-from eval_build import pick_test_users, read_ratings, seed, test_users_n
+from ragommender.evaluation.build import pick_test_users, seed, test_users_n
+from ragommender.catalog import read_ratings
+from ragommender.paths import popularity_file
 import numpy as np
 import pickle
 
 # non personal popularity prior, log(1 + rating count) scaled to 0..1 by the catalog max
 # 'all' counts every user for the api, 'eval' leaves out the held out eval users so the eval can't see their ratings
-popularity_file = 'movie-info/popularity.pkl'
 
 def scaled(counts):
     logs = np.log1p(counts)

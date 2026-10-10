@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
+from ragommender import llm
 import httpx
 import json
-import llm
 import numpy as np
 import sys
 import time
@@ -64,7 +64,7 @@ def bench(task, level, rounds=2):
           f"total={sum(r['tokens'] for r in results)/wall:7.1f} tok/s")
 
 if __name__ == '__main__':
-    # python bench_llm.py [levels] [tasks], e.g. python bench_llm.py 1,2,4,8,12 explain,rewrite
+    # python scripts/bench_llm.py [levels] [tasks], e.g. python scripts/bench_llm.py 1,2,4,8,12 explain,rewrite
     levels = [int(x) for x in (sys.argv[1] if len(sys.argv) > 1 else '1,2,4,8,12').split(',')]
     names = (sys.argv[2] if len(sys.argv) > 2 else 'explain,rewrite').split(',')
     print(f"server: {llm.base_url} model: {llm.get_model()}")

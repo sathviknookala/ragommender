@@ -1,9 +1,9 @@
-from gen_embeds import create_collection, overviews_arg
-from hybrid_search import default_embed_model
-from catalog import movie_file, tags_file
+from ragommender.ingest.gen_embeds import create_collection, overviews_arg
+from ragommender.hybrid_search import default_embed_model
+from ragommender import catalog
+from ragommender.paths import labels_file, eval_bm25_file, eval_movieIds_file
 import hashlib
 import numpy as np
-import pandas as pd
 import pickle
 import sys
 import time
@@ -20,14 +20,11 @@ min_tag_users = 20
 min_ratings = 20
 min_users = 2
 min_relevant = 5
-labels_file = 'movie-info/eval_consensus.pkl'
 eval_collection = 'eval_db'
-eval_bm25_file = 'bm25/eval_bm25.pkl'
-eval_movieIds_file = 'movie-info/eval_movieIds.pkl'
 
 def pick_test_users(rng, ratings):
-    # the held out users, shared with build_popularity.py so the eval's popularity excludes them
-    tags = tags_file.dropna(subset=['tag']).copy()
+    # the held out users, shared with ingest/build_popularity.py so the eval's popularity excludes them
+    tags = catalog.tags().dropna(subset=['tag']).copy()
     tags['query'] = tags['tag'].astype(str).str.strip().str.lower()
     tag_users = tags.groupby('query')['userId'].nunique()
     tags = tags[tags['query'].isin(tag_users[tag_users >= min_tag_users].index)]
@@ -37,11 +34,8 @@ def pick_test_users(rng, ratings):
     test_users = set(rng.choice(candidates, size=min(test_users_n, len(candidates)), replace=False).tolist())
     return tags, test_users
 
-def read_ratings():
-    return pd.read_csv('movie-info/ratings.csv', dtype={'userId': 'int32', 'movieId': 'int32', 'rating': 'float32', 'timestamp': 'int64'})
-
 def build_labels(rng):
-    tags, test_users = pick_test_users(rng, read_ratings())
+    tags, test_users = pick_test_users(rng, catalog.read_ratings())
     held = tags[tags['userId'].isin(test_users)]
     users = held.groupby(['query', 'movieId'])['userId'].nunique()
     agreed = users[users >= min_users].reset_index()
@@ -79,11 +73,11 @@ if __name__ == '__main__':
 
     if '--labels-only' not in sys.argv:
         # the eval index leaves out every tag the held out users wrote, so a query can't match its own tag
-        held_out_tags = tags_file[~tags_file['userId'].isin(test_users)]
-        print(f"indexing with {len(held_out_tags)} of {len(tags_file)} tag applications")
+        held_out_tags = catalog.tags()[~catalog.tags()['userId'].isin(test_users)]
+        print(f"indexing with {len(held_out_tags)} of {len(catalog.tags())} tag applications")
         name = (eval_collection + ('' if embed_model == default_embed_model else '_' + embed_model.split('/')[-1].lower())
                 + (f'_clean{clean}' if clean else '') + ('_ov' if overviews else ''))
-        collection, bm25_index, movieIds = create_collection(name, movie_file, held_out_tags, len(movie_file),
+        collection, bm25_index, movieIds = create_collection(name, catalog.movies(), held_out_tags, len(catalog.movies()),
                                                              embed_top_tags=clean, embed_model=embed_model, overviews=overviews)
         if not variant:
             with open(eval_bm25_file, 'wb') as f:
