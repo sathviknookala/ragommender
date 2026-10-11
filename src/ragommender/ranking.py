@@ -24,6 +24,14 @@ candidate_depth = 100
 # towards popular movies
 bm25_params = {'k1': 5.0, 'b': 0.1}
 
+# vocabulary mapping (vocab.py): the n nearest tags with at least min_sim cosine, among tags min_users people used,
+# are added to the bm25 text. prompt 'tag' embeds the query with vocab.tag_prompt, 'movie' reuses the knn query vector.
+# picked on consensus natural val (evaluation/run.py --sweep=vocab), natural test +0.0419 [+0.0273, +0.0562]
+vocab_params = {'n': 1, 'min_sim': 0.5, 'min_users': 100, 'prompt': 'tag'}
+# with rewrite on, the llm picks among the n nearest tags instead (rewrite.pick_tags), next to the rewrite's keywords:
+# natural test +0.0547 [+0.0398, +0.0718] over plain search, against +0.0092 for the rewrite alone
+rewrite_vocab_params = {'n': 10, 'min_sim': 0.0, 'min_users': 20, 'prompt': 'llm'}
+
 def parse_year(title):
     match = re.search(r'\((\d{4})\)\s*$', title)
     return int(match.group(1)) if match else None

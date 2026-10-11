@@ -32,3 +32,13 @@ def test_search_endpoint_on_the_shipped_index():
     assert len(body['items']) == 10
     assert body['model_version'].startswith('rag_db/')
     assert all(i['reason'] for i in body['items'])
+
+def test_bm25_scores_match_rank_bm25():
+    import numpy as np
+    from ragommender.hybrid_search import Retrieval
+    import chromadb
+    from ragommender.evaluation.run import shipped_collection
+    retrieval = Retrieval(chromadb.PersistentClient(path=str(paths.chroma_dir)).get_collection(shipped_collection),
+                          paths.eval_bm25_file, paths.eval_movieIds_file)
+    for tokens in [['dark', 'comedy'], ['uplifting', 'movies', 'feel', 'good'], ['comedy', 'comedy'], ['zzzunknown']]:
+        assert np.array_equal(retrieval.bm25_scores(tokens), retrieval.bm25_data.get_scores(tokens)), tokens

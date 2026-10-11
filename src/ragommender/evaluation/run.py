@@ -1,5 +1,7 @@
-from ragommender.ranking import default_weights, fuse, with_fallback, boost_era, parse_year, candidate_depth, bm25_params
-from ragommender.rewrite import rewrite_query, rewrite_system
+from ragommender.ranking import (default_weights, fuse, with_fallback, boost_era, parse_year, candidate_depth, bm25_params,
+                                 vocab_params, rewrite_vocab_params)
+from ragommender.vocab import TagVocab, tag_prompt, map_tags, expand
+from ragommender.rewrite import rewrite_query, rewrite_system, pick_tags, pick_system
 from ragommender import llm, paths
 from concurrent.futures import ThreadPoolExecutor
 import chromadb
@@ -20,19 +22,32 @@ import time
 #   --natural            swaps each tag for its llm paraphrase (evaluation/paraphrase.py) and scores the llm rewrite too,
 #                        --rewrite fills rewrites the saved file is missing through the local llm
 #   --sweep              grids vector, popularity and bm25 k1/b on val only, test isn't scored
-#   --weights=K=V,...    scores those weights (vector, popularity, k1, b) as 'candidate' against what ships
+#   --sweep=vocab        grids the vocabulary mapping (ranking.vocab_params) at the shipped weights, val only,
+#                        with --llm also the llm picking among the nearest tags (prompt 'llm', needs the llm server)
+#   --weights=K=V,...    scores those weights (vector, popularity, k1, b, vocab_n, vocab_min_sim, vocab_min_users,
+#                        vocab_prompt, where prompt llm needs the llm server) as 'candidate' against what ships, and
+#                        with --natural also with the rewrite's keywords ('candidate_rewrite'). --label=NAME names
+#                        the results file, eval_consensus_<label>[_natural].json
 #   --collection=NAME    another eval index, e.g. eval_db_qwen3-embedding-0.6b_clean25_ov
 #   --depth=N            candidates per list
 natural = '--natural' in sys.argv
 sweep = '--sweep' in sys.argv
+vocab_sweep = '--sweep=vocab' in sys.argv
 # the eval index that matches the shipped rag_db: qwen3 on title, genres and the top 25 tags
 shipped_collection = 'eval_db_qwen3-embedding-0.6b_clean25'
 collection_name = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--collection=')), shipped_collection)
 depth = next((int(a.split('=')[1]) for a in sys.argv if a.startswith('--depth=')), candidate_depth)
-candidate = next(({k: float(v) for k, v in (kv.split('=') for kv in a.split('=', 1)[1].split(','))}
+def number(v):
+    try:
+        return float(v)
+    except ValueError:
+        return v
+
+candidate = next(({k: number(v) for k, v in (kv.split('=') for kv in a.split('=', 1)[1].split(','))}
                   for a in sys.argv if a.startswith('--weights=')), None)
 suffix = ('_natural' if natural else '') + ('' if collection_name == shipped_collection else f'_{collection_name}') + \
          ('' if depth == candidate_depth else f'_d{depth}')
+label = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--label=')), 'candidate')
 bootstrap_n = 1000
 metric_names = ['ndcg@10', 'precision@10', 'recall@10']
 # saved rewrites of the natural queries, keyed by the rewrite prompt so a prompt change gets fresh ones
@@ -46,6 +61,11 @@ references = {
 # the first sweep's best rows sat at popularity 0.02 and k1 5, so the grid has steps around 0.02 and goes past 5
 grid = {'vector': [0.0, 0.125, 0.25, 0.5, 1.0], 'popularity': [0.0, 0.0025, 0.005, 0.01, 0.015, 0.02, 0.03, 0.04],
         'k1': [1.5, 3.0, 5.0, 8.0], 'b': [0.1, 0.3, 0.75]}
+# the llm picks from the n nearest tags (tag prompt, min_users 20), saved by prompt so reruns score the same picks
+picks_file = paths.movie_info / f"eval_vocab_picks{'_natural' if natural else ''}_{hashlib.sha1(pick_system.encode()).hexdigest()[:8]}.pkl"
+llm_candidates = [10, 20]
+# the first vocab sweep's best rows sat at min_users 100, the grid's edge, so it goes up to 1000
+vocab_grid = {'n': [1, 2, 3, 5, 8], 'min_sim': [0.0, 0.5, 0.6, 0.7], 'min_users': [5, 20, 100, 300, 1000], 'prompt': ['tag', 'movie']}
 
 def load_queries():
     with open(paths.labels_file, 'rb') as f:
@@ -78,18 +98,30 @@ def year_range(r):
     years = sorted(y for y in [r.get('year_from'), r.get('year_to')] if isinstance(y, int))
     return (years[0], years[-1]) if years else None
 
-def bm25_lists(retrieval, queries, params, rewrites=None):
-    # bm25 lists at these k1 and b, from each query's rewritten text and era when rewrites are given
+bm25_cache = {}
+
+def bm25_lists(retrieval, queries, params, rewrites=None, vocab=None, vp=vocab_params, vecs=None, idx=None):
+    # bm25 lists at these k1 and b, from each query's rewritten text and era when rewrites are given, plus the tags
+    # the vocabulary maps it to. lists are cached by text, since many mapping settings give the same text
     retrieval.bm25_data.k1, retrieval.bm25_data.b = params['k1'], params['b']
-    lists = []
-    for q in queries:
-        if rewrites is None:
-            lists.append((retrieval.bm25_rank(q['query'], depth), None))
-        else:
+    lists = [None] * len(queries)
+    for i in (range(len(queries)) if idx is None else idx):
+        q, years, text = queries[i], None, queries[i]['query']
+        if rewrites is not None:
             # a query without a rewrite keeps its own text, as the api does when the llm fails
             r = rewrites.get(q['query'], {'keywords': []})
             years = year_range(r)
-            lists.append((retrieval.bm25_rank(f"{q['query']} {' '.join(r['keywords'])}", depth, year_range=years), years))
+            text = f"{text} {' '.join(r['keywords'])}"
+        if vocab is not None and vp['n'] and vp['prompt'] == 'llm':
+            # the llm's picks among the n nearest tags, a query without picks keeps its text
+            cands = [t for t, _ in map_tags(vocab, q['query'], vecs['tag'][i], dict(vp, min_sim=0.0))]
+            text = expand(text, [(t, None) for t in vp['picks'].get((q['query'], tuple(cands))) or []])
+        elif vocab is not None and vp['n']:
+            text = expand(text, map_tags(vocab, q['query'], vecs[vp['prompt']][i], vp))
+        key = (params['k1'], params['b'], text, years)
+        if key not in bm25_cache:
+            bm25_cache[key] = retrieval.bm25_rank(text, depth, year_range=years)
+        lists[i] = (bm25_cache[key], years)
     return lists
 
 def rank(knn, bm25, years, weights, popularity):
@@ -141,6 +173,42 @@ def show(name, split, entry):
           f"{entry['ndcg@10']['ci95'][1]:.4f}]  p@10 {entry['precision@10']['mean']:.3f}  "
           f"r@10 {entry['recall@10']['mean']:.3f}{vs}", flush=True)
 
+def load_picks(queries, vocab, vecs, idx):
+    # llm picks for every query and candidate count, missing ones filled through the llm server
+    picks = {}
+    if picks_file.exists():
+        with open(picks_file, 'rb') as f:
+            picks = pickle.load(f)
+    vp = {'n': 0, 'min_sim': 0.0, 'min_users': 20}
+    todo = sorted({(queries[i]['query'], cands) for i in idx for n in llm_candidates
+                   if (cands := tuple(t for t, _ in map_tags(vocab, queries[i]['query'], vecs['tag'][i], dict(vp, n=n))))}
+                  - picks.keys())
+    if todo:
+        assert llm.chat([{'role': 'user', 'content': 'Say ok.'}], max_tokens=5), f'no llm at {llm.base_url}, start serve_llm.sh'
+        with ThreadPoolExecutor(llm.max_concurrency) as pool:
+            got = list(pool.map(lambda qc: pick_tags(qc[0], list(qc[1]))[0], todo))
+        picks.update({qc: p for qc, p in zip(todo, got) if p is not None})
+        with open(picks_file, 'wb') as f:
+            pickle.dump(picks, f)
+    print(f"{len(todo)} llm picks made this run, {sum(1 for qc in todo if qc not in picks)} failed")
+    return picks
+
+def select(rows, val, buckets, rng):
+    # selection rule (docs/evaluation.md pass bar): the highest val mean among rows whose tail difference against
+    # what ships isn't clearly worse (ci upper bound >= 0)
+    tail = [k for k, i in enumerate(val) if buckets[i] == 'tail']
+    for r in rows:
+        r['vs_shipped'] = summarize(r['diff'], rng)
+        r['tail_vs_shipped'] = summarize([r['diff'][k] for k in tail], rng)
+        r['eligible'] = r['tail_vs_shipped']['ci95'][1] >= 0
+    rows.sort(key=lambda r: -r['ndcg@10'])
+    return next((r for r in rows if r['eligible']), None)
+
+def show_row(label, r):
+    d, t = r['vs_shipped'], r['tail_vs_shipped']
+    print(f"  {label} ndcg@10 {r['ndcg@10']:.4f}  vs shipped {d['mean']:+.4f} [{d['ci95'][0]:+.4f}, {d['ci95'][1]:+.4f}]  "
+          f"tail {t['mean']:+.4f} [{t['ci95'][0]:+.4f}, {t['ci95'][1]:+.4f}]{'' if r['eligible'] else '  (fails tail)'}")
+
 if __name__ == '__main__':
     # model imports stay here, so tests can import the ranking and metrics without loading torch
     from ragommender.hybrid_search import Retrieval
@@ -159,60 +227,76 @@ if __name__ == '__main__':
     # retrieval once per query, every configuration re-fuses the same lists
     vectors = retrieval.embed([q['query'] for q in queries])
     knn = [retrieval.knn_search(k=depth, query_embeddings=v)[1] for v in vectors]
-    bm25 = bm25_lists(retrieval, queries, bm25_params)
+    # the vocabulary built from the eval index's tags, and the query vectors the mapping can use
+    vocab = TagVocab(paths.eval_vocab_file) if paths.eval_vocab_file.exists() else None
+    vecs = {'movie': vectors, 'tag': retrieval.embed([q['query'] for q in queries], tag_prompt)} if vocab else None
+    if vocab_params['n']:
+        assert vocab, f'vocabulary mapping is on but {paths.eval_vocab_file} is missing, run ingest.build_vocab --eval'
+    lists_for = lambda params=bm25_params, vp=vocab_params, rewrites=None, idx=None: \
+        bm25_lists(retrieval, queries, params, rewrites, vocab, vp, vecs, idx)
+    bm25 = lists_for()
     every = range(len(queries))
+    val = [i for i in every if queries[i]['split'] == 'val']
     shipped = score(knn, bm25, queries, default_weights, popularity, every)
     results = {'natural_queries': natural, 'n_queries': len(queries), 'collection': collection_name, 'depth': depth,
-               'weights': default_weights, 'bm25_params': bm25_params,
+               'weights': default_weights, 'bm25_params': bm25_params, 'vocab_params': vocab_params,
                'popularity_buckets': {b: buckets.count(b) for b in ['head', 'mid', 'tail']}}
 
-    if sweep:
-        # val only, every grid row against what ships, bm25 lists are rebuilt per k1 and b
-        val = [i for i in every if queries[i]['split'] == 'val']
+    if sweep or vocab_sweep:
+        # val only, every grid row against what ships
         rows = []
-        for k1, b in itertools.product(grid['k1'], grid['b']):
-            lists = bm25_lists(retrieval, queries, {'k1': k1, 'b': b}) if (k1, b) != (bm25_params['k1'], bm25_params['b']) else bm25
-            for vector, pop in itertools.product(grid['vector'], grid['popularity']):
-                w = dict(default_weights, vector=vector, popularity=pop)
-                r = score(knn, lists, queries, w, popularity, val)
-                rows.append({'vector': vector, 'popularity': pop, 'k1': k1, 'b': b,
-                             'ndcg@10': float(np.mean([r[i]['ndcg@10'] for i in val])),
+        if sweep:
+            # bm25 lists are rebuilt per k1 and b
+            for k1, b in itertools.product(grid['k1'], grid['b']):
+                lists = lists_for({'k1': k1, 'b': b}, idx=val)
+                for vector, pop in itertools.product(grid['vector'], grid['popularity']):
+                    r = score(knn, lists, queries, dict(default_weights, vector=vector, popularity=pop), popularity, val)
+                    rows.append({'vector': vector, 'popularity': pop, 'k1': k1, 'b': b,
+                                 'ndcg@10': float(np.mean([r[i]['ndcg@10'] for i in val])),
+                                 'diff': [r[i]['ndcg@10'] - shipped[i]['ndcg@10'] for i in val]})
+            keys, out_grid, out = ['vector', 'popularity', 'k1', 'b'], grid, f'eval_consensus_sweep{suffix}.json'
+        else:
+            assert vocab, f'{paths.eval_vocab_file} is missing, run ingest.build_vocab --eval'
+            vps = [{'n': n, 'min_sim': min_sim, 'min_users': min_users, 'prompt': prompt}
+                   for n, min_sim, min_users, prompt in itertools.product(*vocab_grid.values())]
+            if '--llm' in sys.argv:
+                picks = load_picks(queries, vocab, vecs, val)
+                vps += [{'n': n, 'min_sim': 0.0, 'min_users': 20, 'prompt': 'llm', 'picks': picks} for n in llm_candidates]
+            for vp in vps:
+                r = score(knn, lists_for(vp=vp, idx=val), queries, default_weights, popularity, val)
+                rows.append({**{k: v for k, v in vp.items() if k != 'picks'}, 'ndcg@10': float(np.mean([r[i]['ndcg@10'] for i in val])),
                              'diff': [r[i]['ndcg@10'] - shipped[i]['ndcg@10'] for i in val]})
-        # selection rule (docs/evaluation.md pass bar): the highest val mean among rows whose tail difference against
-        # what ships isn't clearly worse (ci upper bound >= 0)
-        tail = [k for k, i in enumerate(val) if buckets[i] == 'tail']
-        for r in rows:
-            r['vs_shipped'] = summarize(r['diff'], rng)
-            r['tail_vs_shipped'] = summarize([r['diff'][k] for k in tail], rng)
-            r['eligible'] = r['tail_vs_shipped']['ci95'][1] >= 0
-        rows.sort(key=lambda r: -r['ndcg@10'])
-        pick = next(r for r in rows if r['eligible'])
+            keys, out_grid, out = list(vocab_grid), vocab_grid, f'eval_consensus_vocab_sweep{suffix}.json'
+        pick = select(rows, val, buckets, rng)
         shipped_val = float(np.mean([shipped[i]['ndcg@10'] for i in val]))
         print(f"shipped val ndcg@10 {shipped_val:.4f}, {len(rows)} rows, {sum(r['eligible'] for r in rows)} pass the tail check, best:")
         for r in rows[:15]:
-            d, t = r['vs_shipped'], r['tail_vs_shipped']
-            print(f"  vector {r['vector']:<5} popularity {r['popularity']:<6} k1 {r['k1']:<3} b {r['b']:<4} ndcg@10 "
-                  f"{r['ndcg@10']:.4f}  vs shipped {d['mean']:+.4f} [{d['ci95'][0]:+.4f}, {d['ci95'][1]:+.4f}]  "
-                  f"tail {t['mean']:+.4f} [{t['ci95'][0]:+.4f}, {t['ci95'][1]:+.4f}]{'' if r['eligible'] else '  (fails tail)'}")
-        print(f"pick: vector {pick['vector']}, popularity {pick['popularity']}, k1 {pick['k1']}, b {pick['b']}")
-        results['pick'] = {k: pick[k] for k in ['vector', 'popularity', 'k1', 'b']}
-        results.update(split='val', shipped_val=shipped_val, grid=grid,
+            show_row(' '.join(f"{k} {r[k]:<5}" for k in keys), r)
+        print('pick: ' + (', '.join(f"{k} {pick[k]}" for k in keys) if pick else 'none'))
+        results['pick'] = {k: pick[k] for k in keys} if pick else None
+        results.update(split='val', shipped_val=shipped_val, grid=out_grid,
                        rows=[{k: v for k, v in r.items() if k != 'diff'} for r in rows])
-        out = paths.results_dir / f'eval_consensus_sweep{suffix}.json'
+        out = paths.results_dir / out
     else:
         rows = {'shipped': shipped}
         rows.update({name: score(knn, bm25, queries, w, popularity, every) for name, w in references.items()})
         if candidate:
             w = dict(default_weights, **{k: v for k, v in candidate.items() if k in default_weights})
             params = {'k1': candidate.get('k1', bm25_params['k1']), 'b': candidate.get('b', bm25_params['b'])}
-            lists = bm25_lists(retrieval, queries, params) if params != bm25_params else bm25
-            rows['candidate'] = score(knn, lists, queries, w, popularity, every)
-            results['candidate'] = {'weights': w, 'bm25_params': params}
+            vp = {k: candidate.get(f'vocab_{k}', v) for k, v in vocab_params.items()}
+            results['candidate'] = {'weights': w, 'bm25_params': params, 'vocab_params': dict(vp)}
+            if vp['prompt'] == 'llm':
+                vp['picks'] = load_picks(queries, vocab, vecs, every)
+            rows['candidate'] = score(knn, lists_for(params, vp), queries, w, popularity, every)
+            if natural and (rewrites := load_rewrites(queries)):
+                rows['candidate_rewrite'] = score(knn, lists_for(params, vp, rewrites), queries, w, popularity, every)
         if natural:
             rewrites = load_rewrites(queries)
             if rewrites:
-                rows['shipped_rewrite'] = score(knn, bm25_lists(retrieval, queries, bm25_params, rewrites), queries,
-                                                default_weights, popularity, every)
+                # rewrite mode as retrieval.search runs it: the rewrite's keywords and the llm's picks among the nearest tags
+                rewrite_vp = dict(rewrite_vocab_params, picks=load_picks(queries, vocab, vecs, every))
+                rows['shipped_rewrite'] = score(knn, lists_for(vp=rewrite_vp, rewrites=rewrites), queries, default_weights,
+                                                popularity, every)
                 results['rewrite'] = {'file': str(rewrites_file.relative_to(paths.root)), 'without_rewrite': sum(q['query'] not in rewrites for q in queries)}
         # popularity alone over the shipped candidate pool, and a perfect reorder of that pool
         pools = [list({m for m, _, _ in k} | {m for m, _, _ in b}) for k, (b, _) in zip(knn, bm25)]
@@ -226,7 +310,7 @@ if __name__ == '__main__':
             for split in ['val', 'test']:
                 show(name, split, results['configs'][name][split])
         # a candidate run is a one time test look, kept apart from the base results
-        out = paths.results_dir / f"eval_consensus{'_candidate' if candidate else ''}{suffix}.json"
+        out = paths.results_dir / f"eval_consensus{'_' + label if candidate else ''}{suffix}.json"
     with open(out, 'w') as f:
         json.dump(results, f, indent=1)
     print(f"written to {out}, {time.time()-start:.0f}s")

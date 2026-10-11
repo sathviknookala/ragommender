@@ -7,6 +7,7 @@ from ragommender import llm, retrieval
 async def lifespan(app):
     # load the index and embedding model before the first request
     retrieval.index()
+    retrieval.vocab()
     yield
     llm.close()
 
@@ -23,6 +24,7 @@ def search(req: SearchRequest):
         'items': items,
         'model_version': retrieval.model_version(),
         'rewritten_query': result['rewritten_query'],
+        'mapped_tags': result['mapped_tags'],
         'llm_used': result['llm_used'],
         'llm_cached': result['llm_cached']
     }

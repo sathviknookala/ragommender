@@ -1,7 +1,9 @@
 from functools import cache
 from ragommender.hybrid_search import Retrieval, default_embed_model
-from ragommender.ranking import default_weights, candidate_depth, boost_era
-from ragommender.rewrite import rewrite_query
+from ragommender.ranking import default_weights, candidate_depth, boost_era, vocab_params, rewrite_vocab_params
+from ragommender.vocab import TagVocab, tag_prompt, map_tags, expand
+from ragommender.rewrite import rewrite_query, pick_tags
+from concurrent.futures import ThreadPoolExecutor
 from ragommender import llm, paths
 import chromadb
 import os
@@ -13,6 +15,30 @@ def index():
     collection = chromadb.PersistentClient(path=str(paths.chroma_dir)).get_collection(name)
     retrieval = Retrieval(collection, paths.bm25_file, paths.movieIds_file, paths.popularity_file)
     return collection, retrieval
+
+@cache
+def vocab():
+    # the tag vocabulary queries are mapped onto, None when the mapping is off
+    if not vocab_params['n']:
+        return None
+    assert paths.vocab_file.exists(), f'vocabulary mapping is on but {paths.vocab_file} is missing, run ingest.build_vocab'
+    return TagVocab(paths.vocab_file)
+
+def map_query(query: str, params=vocab_params):
+    # the vocabulary tags added to the bm25 text, as the eval adds them (evaluation/run.py bm25_lists)
+    if vocab() is None or query.strip().lower() in vocab().tag_set:
+        return []
+    _, retrieval = index()
+    vec = retrieval.embed(query, None if params['prompt'] == 'movie' else tag_prompt)
+    return map_tags(vocab(), query, vec, params)
+
+def rewrite_and_pick(query: str):
+    # the rewrite and the llm's pick among the nearest tags, run at once so the second call adds little latency
+    candidates = [t for t, _ in map_query(query, rewrite_vocab_params)]
+    with ThreadPoolExecutor(2) as pool:
+        rewritten = pool.submit(rewrite_query, query)
+        picked = pool.submit(pick_tags, query, candidates)
+        return rewritten.result(), picked.result()
 
 def model_version():
     # the index and embedding model results come from, returned with every search
@@ -45,11 +71,19 @@ def search(query: str, k: int = 20, explain: bool = False, rewrite: bool = False
 
     rewritten = None
     if rewrite:
-        rewritten, was_cached = rewrite_query(query)
+        (rewritten, was_cached), (picked, pick_cached) = rewrite_and_pick(query)
         if not isinstance(rewritten, dict):
             rewritten = None
         llm_calls.append((rewritten is not None, was_cached))
-    bm25_text = f"{query} {' '.join(rewritten['keywords'])}" if rewritten else None
+        if picked is not None:
+            llm_calls.append((True, pick_cached))
+        # the llm's picks replace the embedding mapping, adding both scored lower on val (+0.0242 against +0.0414)
+        # when the pick fails, search falls back to the embedding mapping
+        mapped = [(t, None) for t in picked] if picked is not None else map_query(query)
+    else:
+        mapped = map_query(query)
+    bm25_text = f"{query} {' '.join(rewritten['keywords'])}" if rewritten else query
+    bm25_text = expand(bm25_text, mapped)
     years = sorted(y for y in [rewritten.get('year_from'), rewritten.get('year_to')] if isinstance(y, int)) if rewritten else []
     year_range = (years[0], years[-1]) if years else None
 
@@ -92,6 +126,7 @@ def search(query: str, k: int = 20, explain: bool = False, rewrite: bool = False
     return {
         'items': results,
         'rewritten_query': rewritten,
+        'mapped_tags': [t for t, _ in mapped],
         'llm_used': any(used for used, _ in llm_calls),
         'llm_cached': bool(llm_calls) and all(used and cached for used, cached in llm_calls)
     }

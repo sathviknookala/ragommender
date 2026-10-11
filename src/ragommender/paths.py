@@ -21,3 +21,6 @@ labels_file = movie_info / 'eval_consensus.pkl'
 natural_file = movie_info / 'eval_natural.pkl'
 eval_bm25_file = bm25_dir / 'eval_bm25.pkl'
 eval_movieIds_file = movie_info / 'eval_movieIds.pkl'
+# tag vocabularies for query mapping, written by ingest/build_vocab.py (the eval's with --eval)
+vocab_file = movie_info / 'tag_vocab.pkl'
+eval_vocab_file = movie_info / 'eval_tag_vocab.pkl'

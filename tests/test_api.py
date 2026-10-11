@@ -11,7 +11,7 @@ def client(monkeypatch):
     def search(query, k, explain, rewrite):
         calls.append((query, k, explain, rewrite))
         item = {'item_id': '608', 'title': 'Fargo (1996)', 'score': 0.025, 'reason': ["Keyword match for 'x'"]}
-        return {'items': [item] * k, 'rewritten_query': None, 'llm_used': False, 'llm_cached': False}
+        return {'items': [item] * k, 'rewritten_query': None, 'mapped_tags': ['dark comedy'], 'llm_used': False, 'llm_cached': False}
     monkeypatch.setattr(retrieval, 'search', search)
     monkeypatch.setattr(retrieval, 'model_version', lambda: 'test_db/test-model')
     c = TestClient(app)
@@ -27,7 +27,8 @@ def test_search_defaults_and_response_shape(client):
     assert body['items'][0] == {'item_id': '608', 'title': 'Fargo (1996)', 'score': 0.025,
                                 'reason': ["Keyword match for 'x'"], 'explain': None}
     assert body['model_version'] == 'test_db/test-model'
-    assert set(body) == {'items', 'model_version', 'rewritten_query', 'llm_used', 'llm_cached'}
+    assert body['mapped_tags'] == ['dark comedy']
+    assert set(body) == {'items', 'model_version', 'rewritten_query', 'mapped_tags', 'llm_used', 'llm_cached'}
 
 def test_search_passes_options(client):
     assert client.post('/search', json={'query': 'heist', 'k': 3, 'explain': True, 'rewrite': True}).status_code == 200

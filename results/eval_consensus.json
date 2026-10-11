@@ -14,6 +14,12 @@
   "k1": 5.0,
   "b": 0.1
  },
+ "vocab_params": {
+  "n": 1,
+  "min_sim": 0.5,
+  "min_users": 100,
+  "prompt": "tag"
+ },
  "popularity_buckets": {
   "head": 262,
   "mid": 262,

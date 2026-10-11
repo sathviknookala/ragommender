@@ -32,3 +32,19 @@ def rewrite_query(query: str):
     # rewrites don't depend on the user so they share one cache entry per query
     return llm.cached(llm.make_key('rewrite', query.lower()),
                       lambda: llm.chat(messages, max_tokens=100, schema=schema, temperature=0.3))
+
+# the llm side of the vocabulary mapping (vocab.py): from the tags nearest a query, keep the ones that mean what it asks
+pick_system = ("Pick the tags that describe the movies a search asks for. The tags come from a fixed list movie fans "
+               "wrote. Pick only tags that mean what the search asks, not ones that are merely related, broader or "
+               "about something else, and pick none when none fit. Reply as json {tags: [...]}.")
+
+def pick_tags(query: str, candidates: list):
+    if not candidates:
+        return [], False
+    schema = {'type': 'object', 'required': ['tags'],
+              'properties': {'tags': {'type': 'array', 'items': {'type': 'string', 'enum': candidates}, 'maxItems': 5}}}
+    messages = [{'role': 'system', 'content': pick_system},
+                {'role': 'user', 'content': f"Search: {query}\nTags: {', '.join(candidates)}"}]
+    picked, was_cached = llm.cached(llm.make_key('pick', query.lower(), candidates),
+                                    lambda: llm.chat(messages, max_tokens=80, schema=schema, temperature=0.0))
+    return (picked['tags'] if isinstance(picked, dict) else None), was_cached
