@@ -11,6 +11,13 @@ default_embed_model = 'all-MiniLM-L6-v2'
 # qwen3 embeddings put an instruction before queries, documents are embedded without one
 query_prompts = {'Qwen/Qwen3-Embedding-0.6B': 'Instruct: Given a movie search, retrieve movies that match it\nQuery:'}
 
+def check_same_build(collection, bm25_data, movieIds):
+    # bm25 corpus position i is movieIds' i-th movie and knn ids are looked up in movieIds, so the three must come from
+    # one ingest.gen_embeds run. pickles from another build would put keyword hits on the wrong movies without an error
+    sizes = {'collection': collection.count(), 'bm25': bm25_data.corpus_size, 'movieIds': len(movieIds)}
+    if len(set(sizes.values())) > 1:
+        raise ValueError(f"index files are from different builds, sizes {sizes}: rebuild them together with ingest.gen_embeds")
+
 class Retrieval:
     def __init__(self, collection, bm25_filepath, movieIds_filepath, popularity_filepath=None, popularity_key='all',
                  bm25_params=bm25_params):
@@ -38,6 +45,7 @@ class Retrieval:
         self.doc_len = np.array(self.bm25_data.doc_len)
         with open(movieIds_filepath, 'rb') as f:
             self.movieIds = pickle.load(f)
+        check_same_build(collection, self.bm25_data, self.movieIds)
         # bm25 corpus position i -> movieId
         self.idList = list(self.movieIds.keys())
         # bm25 corpus position i -> release year, 0 when the title has none
