@@ -1,0 +1,23 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          # the version the project is built and evaluated with
+          python-version: '3.10'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      # the cpu build of torch: the unit tests load no model, and the default cuda build is several GB
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -e '.[dev]'
+      # the default run deselects the integration and llm tests, which need the built indexes, the gpu and the llm server
+      - run: pytest
