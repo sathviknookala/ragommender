@@ -18,6 +18,8 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "sentence-transformers>=5.0",
     "spacy>=3.8",
+    # bm25 tokenizes queries and the index with this model (Retrieval, ingest.gen_embeds), the api won't start without it
+    "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
     "torch>=2.9",
     "transformers>=4.57",
     "uvicorn>=0.35",
