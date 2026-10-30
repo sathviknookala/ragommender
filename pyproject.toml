@@ -34,5 +34,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 # integration tests need the built indexes and the gpu: pytest -m integration
-markers = ["integration: needs the built chroma and bm25 indexes"]
-addopts = "-m 'not integration'"
+# llm tests need the llm server (scripts/serve_llm.sh): pytest -m llm
+markers = ["integration: needs the built chroma and bm25 indexes",
+           "llm: needs the llm server"]
+addopts = "-m 'not integration and not llm'"
