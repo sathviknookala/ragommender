@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 from ragommender.api.main import app
+from ragommender.api import main
 from ragommender import llm, retrieval
+import json
 import pytest
 
 # the index isn't loaded: TestClient without a with block skips the lifespan, and search is stubbed
@@ -56,3 +58,32 @@ def test_health(client, monkeypatch, enabled, down_until, state):
     r = client.get('/health')
     assert r.status_code == 200
     assert r.json() == {'status': 'ok', 'model_version': 'test_db/test-model', 'mapping': True, 'llm': state}
+
+def test_search_log(client, monkeypatch, tmp_path):
+    path = tmp_path / 'searches.jsonl'
+    monkeypatch.setattr(main, 'search_log', str(path))
+    client.post('/search', json={'query': 'dark comedy', 'k': 2, 'rewrite': True})
+    client.post('/search', json={'query': 'heist'})
+    # rejected requests never reach the handler, so they aren't logged
+    client.post('/search', json={'query': ' '})
+    lines = [json.loads(line) for line in path.read_text().splitlines()]
+    assert [line['query'] for line in lines] == ['dark comedy', 'heist']
+    first = lines[0]
+    assert set(first) == {'time', 'query', 'k', 'explain', 'rewrite', 'search_ms', 'model_version', 'mapped_tags',
+                          'rewritten_query', 'llm_used', 'llm_cached', 'item_ids'}
+    assert (first['k'], first['explain'], first['rewrite']) == (2, False, True)
+    assert first['item_ids'] == ['608', '608']
+    assert first['mapped_tags'] == ['dark comedy']
+    assert first['model_version'] == 'test_db/test-model'
+    assert first['search_ms'] >= 0
+    assert lines[1]['k'] == 20
+
+def test_search_log_is_off_without_a_path(client, monkeypatch, tmp_path):
+    monkeypatch.setattr(main, 'search_log', None)
+    monkeypatch.chdir(tmp_path)
+    assert client.post('/search', json={'query': 'heist'}).status_code == 200
+    assert list(tmp_path.iterdir()) == []
+
+def test_search_log_failure_does_not_fail_the_search(client, monkeypatch, tmp_path):
+    monkeypatch.setattr(main, 'search_log', str(tmp_path / 'missing' / 'searches.jsonl'))
+    assert client.post('/search', json={'query': 'heist'}).status_code == 200
