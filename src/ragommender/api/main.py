@@ -13,6 +13,15 @@ async def lifespan(app):
 
 app = FastAPI(lifespan=lifespan)
 
+@app.get("/health")
+def health():
+    # the lifespan loads the index before the server takes requests, so an answer here means search is ready
+    # llm is 'disabled' (LLM_ENABLED=0), 'cooldown' after a failure (search falls back to templates for a while) or
+    # 'available' when no call failed lately. the server isn't called, so this stays cheap to poll
+    state = 'disabled' if not llm.enabled else 'available' if llm.is_up() else 'cooldown'
+    return {'status': 'ok', 'model_version': retrieval.model_version(), 'mapping': retrieval.vocab() is not None,
+            'llm': state}
+
 @app.post("/search")
 def search(req: SearchRequest):
     if not req.query.strip():

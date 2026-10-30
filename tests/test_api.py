@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from ragommender.api.main import app
-from ragommender import retrieval
+from ragommender import llm, retrieval
 import pytest
 
 # the index isn't loaded: TestClient without a with block skips the lifespan, and search is stubbed
@@ -46,3 +46,13 @@ def test_unknown_fields_are_ignored(client):
 @pytest.mark.parametrize('method, path', [('post', '/swipe'), ('post', '/survey/start'), ('get', '/user/u1/profile')])
 def test_removed_endpoints(client, method, path):
     assert getattr(client, method)(path).status_code == 404
+
+@pytest.mark.parametrize('enabled, down_until, state', [(True, 0.0, 'available'), (True, float('inf'), 'cooldown'),
+                                                        (False, 0.0, 'disabled')])
+def test_health(client, monkeypatch, enabled, down_until, state):
+    monkeypatch.setattr(retrieval, 'vocab', lambda: object())
+    monkeypatch.setattr(llm, 'enabled', enabled)
+    monkeypatch.setattr(llm, 'down_until', down_until)
+    r = client.get('/health')
+    assert r.status_code == 200
+    assert r.json() == {'status': 'ok', 'model_version': 'test_db/test-model', 'mapping': True, 'llm': state}
